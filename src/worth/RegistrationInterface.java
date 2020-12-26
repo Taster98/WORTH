@@ -8,5 +8,5 @@ import java.rmi.RemoteException;
 * @author Luigi Gesuele
 * */
 public interface RegistrationInterface extends Remote {
-    String register(String nickUtente, String password) throws RemoteException;
+    int register(String nickUtente, String password) throws RemoteException;
 }

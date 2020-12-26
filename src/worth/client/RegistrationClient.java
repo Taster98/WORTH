@@ -21,8 +21,9 @@ public class RegistrationClient {
         try{
             Registry registry = LocateRegistry.getRegistry(host);
             RegistrationInterface stub = (RegistrationInterface) registry.lookup("RegistrationInterface");
-            String response = stub.register(nickname, pwd);
-            System.out.println("Risposta: "+response);
+            int response = stub.register(nickname, pwd);
+            if (response == 7) System.out.println("Risposta: La registrazione è andata a buon fine!\nBenvenuto "+nickname);
+            else System.out.println("Risposta: Il nickname "+nickname+" esiste già. Prova a inserirne uno diverso.");
         }catch(Exception e){
             System.err.println("Client exception: "+e.toString());
             e.printStackTrace();

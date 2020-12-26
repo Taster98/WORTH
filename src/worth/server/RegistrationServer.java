@@ -28,8 +28,9 @@ public class RegistrationServer implements RegistrationInterface {
         initDb();
     }
 
+    // Ritorna 7 se la registrazione è andata a buon fine, -1 se il nickname esiste già
     @Override
-    public String register(String nickUtente, String password) throws RemoteException {
+    public int register(String nickUtente, String password) throws RemoteException {
         // Nickname e password non devono essere nè null nè vuoti
         if (nickUtente == null || password == null) throw new NullPointerException();
         if (nickUtente.equals("") || password.equals("")) throw new IllegalArgumentException();
@@ -46,7 +47,7 @@ public class RegistrationServer implements RegistrationInterface {
             // aggiungo l'utente alla lista solo se non esiste già
             if(!userDb.contains(user))
                 userDb.add(user);
-            else return "User " + nickUtente +" already registered!";
+            else return -1;
             // salvo la lista nel file json
             Writer writer = new FileWriter(Constants.dbPath);
             Gson gson = new GsonBuilder().create();
@@ -57,7 +58,7 @@ public class RegistrationServer implements RegistrationInterface {
             e.printStackTrace();
         }
 
-        return "User " + nickUtente + " registered!";
+        return 7;
     }
 
     private void initDb() {

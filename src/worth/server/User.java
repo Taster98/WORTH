@@ -32,7 +32,7 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return nickName.equals(user.nickName) && password.equals(user.password);
+        return nickName.equals(user.nickName);
     }
 
     @Override
