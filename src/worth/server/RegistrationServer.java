@@ -13,9 +13,7 @@ public class RegistrationServer implements RegistrationInterface {
     public RegistrationServer() {
         userDb = new DatabaseUsers();
         // la lettura non è atomica, va fatta in mutua esclusione
-        synchronized (this) {
-            userDb.readDb();
-        }
+        userDb.readDb();
     }
 
     // Ritorna 7 se la registrazione è andata a buon fine
@@ -35,11 +33,10 @@ public class RegistrationServer implements RegistrationInterface {
             user.setPassword(newPwd);
 
             // Ora che ho creato l'utente, devo inserirlo nel database
-            if(userDb.addUser(user)) andata = true;
+            andata = userDb.addUser(user);
             // la scrittura non è atomica, va fatta in mutua esclusione
-            synchronized (this){
-                userDb.writeDb();
-            }
+            userDb.writeDb();
+            userDb.readDb();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -50,16 +47,16 @@ public class RegistrationServer implements RegistrationInterface {
 
     public static void main(String[] args) {
         try {
-            RegistrationServer usr = new RegistrationServer();
+            RegistrationServer srv = new RegistrationServer();
             // Creo lo stub per la registrazione:
-            RegistrationInterface stub = (RegistrationInterface) UnicastRemoteObject.exportObject(usr, 0);
+            RegistrationInterface stub = (RegistrationInterface) UnicastRemoteObject.exportObject(srv, 0);
 
             // faccio il bind dell'oggetto remoto nel registry
-            LocateRegistry.createRegistry(30000);
-            Registry registry = LocateRegistry.getRegistry(30000);
-            registry.bind("RegistrationInterface", stub);
+            LocateRegistry.createRegistry(30001);
+            Registry registry = LocateRegistry.getRegistry(30001);
+            registry.rebind("RegistrationInterface", stub);
 
-            System.err.println("Server pronto.");
+            System.err.println("Server ready.");
 
             // Avvio server TCP
             TCPServer server = new TCPServer();

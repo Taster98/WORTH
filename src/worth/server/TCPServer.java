@@ -9,12 +9,9 @@ public class TCPServer {
 
     public void start() throws IOException {
         serverSocket = new ServerSocket(Constants.TCP_PORT);
-        int clients_count = 1;
         while(true){
             Thread t = new Thread(new ClientHandler(serverSocket.accept()));
             t.start();
-            System.out.println("Client "+clients_count+" connected");
-            clients_count++;
         }
     }
 
@@ -25,6 +22,7 @@ public class TCPServer {
     public static void main(String[] args){
         TCPServer server = new TCPServer();
         try {
+
             server.start();
         } catch (IOException e) {
             e.printStackTrace();

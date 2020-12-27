@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket;
+import java.net.Socket;;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
@@ -15,52 +15,100 @@ public class ClientHandler implements Runnable{
     private Scanner sc;
     // riferimento al database
     private DatabaseUsers userDb;
-
+    // variabile di controllo per far sì che un client si connetta solo con un user alla volta
+    private boolean logged;
+    // utente collegato a questo thread
+    private User utente;
     public ClientHandler(Socket socket){
+        this.logged = false;
         this.clientSocket = socket;
         sc = new Scanner(System.in);
         this.userDb = new DatabaseUsers();
-        synchronized (this){
-            userDb.readDb();
-        }
-
+        userDb.readDb();
+        utente = new User();
     }
+    private void actionHandler(String action){
+        // Qui posso avere diverse azioni da voler fare;
+        if(action == null) throw new NullPointerException();
+        if(action.equals("")) throw new IllegalArgumentException();
+        // Ora che sono certo che la stringa non sia vuota:
+        String[] data = action.split(" ", 2); // in data[0] ho il comando
+        try {
+            switch (data[0]) {
+                case "login":
+                    userDb.readDb();
+                    // Se c'è già un utente loggato non devo fare nulla
+                    if(!logged) {
+                        String[] info = data[1].split(" ", 2); //in info[0] ho il nickname, in info[1] ho la psw
+                        String psw = Crittografia.hashMe(info[1]);
+                        // Creo l'utente
+                        utente.setNickName(info[0]);
+                        utente.setPassword(psw);
+                        // cerco l'utente se è presente nel db
+                        if (userDb.cercaUtente(utente)) {
+                            //prelevo l'utente
+                            int index_found = userDb.getUserDb().indexOf(utente);
+                            User found = userDb.getUserDb().get(index_found);
+                            // devo controllare la password
+                            if (found.passwordMatch(utente.getPassword())) {
+                                //La password è corretta ma ancora non ho finito:
+                                // Se è già online non può accedere.
+                                if (found.getStato().equals("online")) {
+                                    out.println("User is already connected!");
+                                    return;
+                                } else {
+                                    // SONO QUI E HO FATTO BENE
+                                    out.println("Login success! Welcome back " + utente.getNickName());
+                                    // Devo aggiornare il database
+                                    userDb.setStatus(utente, "online");
+                                    // Setto il flag logged
+                                    logged = true;
+                                }
 
+                            } else {
+                                // PASSWORD ERRATA
+                                out.println("Password is wrong!");
+                                break;
+                            }
+                        } else {
+                            // UTENTE NON ESISTE
+                            out.println("This username doesn't exist!");
+                            return;
+                        }
+                    }else{
+                        // SONO GIÀ COLLEGATO CON UN ACCOUNT
+                        out.println("You must logout from current account in order to login with another one!");
+                        return;
+                    }
+                    break;
+                case "logout":
+                    if(logged){
+                        if(!utente.getNickName().equals("") && userDb.cercaUtente(utente)){
+                            userDb.setStatus(utente,"offline");
+                            logged = false;
+                            out.println("Logout successful!");
+                        }
+                    }else{
+                        // NON SONO LOGGATO!
+                        out.println("You can't logout without login first!");
+                        return;
+                    }
+                    break;
+            }
+        }catch (NoSuchAlgorithmException e){
+            e.printStackTrace();
+        }
+        // Se per qualche motivo un utente prova a rifare la registrazione mentre è loggato, devo dirglielo che non può
+    }
     @Override
     public void run() {
         try {
             out = new PrintWriter(clientSocket.getOutputStream(),true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String inputLine = in.readLine(); //qui ho nick e psw
-            String[] data = inputLine.split(" ",2); //in data[0] ho il nickname, in data[1] ho la psw
-            String psw = Crittografia.hashMe(data[1]);
-            // Creo l'utente
-            User usr = new User();
-            usr.setNickName(data[0]);
-            usr.setPassword(psw);
-            // cerco l'utente se è presente nel db
-            if(userDb.cercaUtente(usr)){
-                //prelevo l'utente
-                int index_found = userDb.getUserDb().indexOf(usr);
-                User found = userDb.getUserDb().get(index_found);
-                // devo controllare la password
-                if(found.passwordMatch(usr.getPassword())){
-                    // SONO QUI E HO FATTO BENE
-                    out.println("Login effettuato con successo! Bentornato "+usr.getNickName());
-                }else{
-                    // PASSWORD ERRATA
-                    out.println("La password che hai inserito è errata.");
-                    return;
-                }
-            }else{
-                // UTENTE NON ESISTE
-                out.println("L'utente inserito non esiste.");
-                return;
+            while(true) {
+                actionHandler(in.readLine());
             }
-            in.close();
-            out.close();
-            clientSocket.close();
-        } catch (IOException | NoSuchAlgorithmException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

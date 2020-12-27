@@ -8,7 +8,7 @@ public final class Constants {
     public static final String HELP = "Welcome to WORTH.\n" +
             "Here is the complete command list:\n" +
             "help -> show this command list.\n" +
-            "clean -> clear the window from things" +
+            "clear -> clear the window from things\n" +
             "register [nickname] [password] -> register a new user with [nickname] and [password]\n" +
             "login [nickname] [password] -> login as the user [nickname] with password [password]\n" +
             "logout -> logout from worth\n" +

@@ -16,11 +16,19 @@ public class TCPClient {
     private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
+    private boolean alreadyLogged;
+
+    public TCPClient() {
+        alreadyLogged = false;
+    }
 
     public void startConnection() throws IOException {
-        clientSocket = new Socket(Constants.LOCALHOST_IP, Constants.TCP_PORT);
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        if (clientSocket == null)
+            clientSocket = new Socket(Constants.LOCALHOST_IP, Constants.TCP_PORT);
+        if (out == null)
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+        if (in == null)
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
 
     public void stopConnection() throws IOException {
@@ -30,10 +38,17 @@ public class TCPClient {
     }
 
     public String loginUser(String nickname, String password) throws IOException {
-        out.println(nickname + " " + password);
+        out.println("login " + nickname + " " + password);
         return in.readLine();
     }
 
+    public String logoutUser() throws IOException {
+        out.println("logout");
+        return in.readLine();
+    }
+
+    /* @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
+    account corrente */
     public void commandInterpreter(String cmd) {
         if (cmd == null) throw new NullPointerException();
         if (cmd.equals("")) throw new IllegalArgumentException();
@@ -47,15 +62,21 @@ public class TCPClient {
                 System.out.println(Constants.HELP);
                 break;
             case "register":
+                try {
+                    this.startConnection();
+                    logoutUser();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 data = exec[1].split(" ", 2);
                 try {
-                    Registry registry = LocateRegistry.getRegistry(Constants.LOCALHOST_IP);
+                    Registry registry = LocateRegistry.getRegistry(30001);
                     RegistrationInterface stub = (RegistrationInterface) registry.lookup("RegistrationInterface");
                     int response = stub.register(data[0], data[1]);
                     if (response == 7)
-                        System.out.println("Risposta: La registrazione è andata a buon fine!\nBenvenuto " + data[0]);
+                        System.out.println("Registration done!\nWelcome " + data[0] + ". You should login now.");
                     else
-                        System.out.println("Risposta: Il nickname " + data[0] + " esiste già. Prova a inserirne uno diverso.");
+                        System.out.println("Nickname " + data[0] + " already exist. Try another one.");
                 } catch (Exception e) {
                     System.err.println("Client exception: " + e.toString());
                     e.printStackTrace();
@@ -63,7 +84,6 @@ public class TCPClient {
                 break;
             case "login":
                 data = exec[1].split(" ", 2);
-                System.out.println(data[0]);
                 try {
                     this.startConnection();
                     System.out.println(loginUser(data[0], data[1]));
@@ -75,6 +95,20 @@ public class TCPClient {
                 System.out.print("\033[H\033[2J");
                 System.out.flush();
                 break;
+            case "logout":
+                try {
+                    this.startConnection();
+                    System.out.println(logoutUser());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "exit":
+                try {
+                    this.stopConnection();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
 
     }
