@@ -1,10 +1,13 @@
 package worth.server;
 
+import worth.Constants;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;;
+import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
@@ -19,13 +22,16 @@ public class ClientHandler implements Runnable{
     private boolean logged;
     // utente collegato a questo thread
     private User utente;
-    public ClientHandler(Socket socket){
+    // server per il callback
+    private ServerNotImpl serverCB;
+    public ClientHandler(Socket socket, ServerNotImpl serverCB){
         this.logged = false;
         this.clientSocket = socket;
         sc = new Scanner(System.in);
         this.userDb = new DatabaseUsers();
         userDb.readDb();
         utente = new User();
+        this.serverCB = serverCB;
     }
     private void actionHandler(String action){
         // Qui posso avere diverse azioni da voler fare;
@@ -54,30 +60,31 @@ public class ClientHandler implements Runnable{
                                 //La password è corretta ma ancora non ho finito:
                                 // Se è già online non può accedere.
                                 if (found.getStato().equals("online")) {
-                                    out.println("User is already connected!");
+                                    out.println(Constants.ANSI_RED +"User is already connected!"+Constants.ANSI_RESET);
                                     return;
                                 } else {
                                     // SONO QUI E HO FATTO BENE
-                                    out.println("Login success! Welcome back " + utente.getNickName());
+                                    out.println(Constants.ANSI_GREEN +"Login success! Welcome back " + utente.getNickName()+Constants.ANSI_RESET);
                                     // Devo aggiornare il database
                                     userDb.setStatus(utente, "online");
+                                    serverCB.update(userDb.getListStatus());
                                     // Setto il flag logged
                                     logged = true;
                                 }
 
                             } else {
                                 // PASSWORD ERRATA
-                                out.println("Password is wrong!");
+                                out.println(Constants.ANSI_RED +"Password is wrong!"+Constants.ANSI_RESET);
                                 break;
                             }
                         } else {
                             // UTENTE NON ESISTE
-                            out.println("This username doesn't exist!");
+                            out.println(Constants.ANSI_RED +"This username doesn't exist!"+Constants.ANSI_RESET);
                             return;
                         }
                     }else{
                         // SONO GIÀ COLLEGATO CON UN ACCOUNT
-                        out.println("You must logout from current account in order to login with another one!");
+                        out.println(Constants.ANSI_RED +"You must logout from current account in order to login with another one!" + Constants.ANSI_RESET);
                         return;
                     }
                     break;
@@ -86,16 +93,34 @@ public class ClientHandler implements Runnable{
                         if(!utente.getNickName().equals("") && userDb.cercaUtente(utente)){
                             userDb.setStatus(utente,"offline");
                             logged = false;
-                            out.println("Logout successful!");
+                            serverCB.update(userDb.getListStatus());
+                            out.println(Constants.ANSI_GREEN +"Logout successful!" + Constants.ANSI_RESET);
                         }
                     }else{
                         // NON SONO LOGGATO!
-                        out.println("You can't logout without login first!");
+                        out.println(Constants.ANSI_RED +"You can't logout without login first!" + Constants.ANSI_RESET);
                         return;
                     }
                     break;
+                case "users":
+                    if(logged){
+                        String toPrint = userDb.getListStatus();
+                        out.println(toPrint);
+                    }else{
+                        // NON SONO LOGGATO!
+                        out.println(Constants.ANSI_RED +"You can't perform this without login first!" + Constants.ANSI_RESET);
+                    }
+                    break;
+                case "online":
+                    if(logged){
+                        out.println(Constants.ANSI_GREEN+userDb.getOnlineListStatus()+Constants.ANSI_RESET);
+                    }else{
+                        // NON SONO LOGGATO!
+                        out.println(Constants.ANSI_RED +"You can't perform this without login first!" + Constants.ANSI_RESET);
+                    }
+                    break;
             }
-        }catch (NoSuchAlgorithmException e){
+        } catch (NoSuchAlgorithmException | IOException e){
             e.printStackTrace();
         }
         // Se per qualche motivo un utente prova a rifare la registrazione mentre è loggato, devo dirglielo che non può

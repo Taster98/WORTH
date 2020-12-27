@@ -6,11 +6,14 @@ import java.net.ServerSocket;
 
 public class TCPServer {
     private ServerSocket serverSocket;
-
+    private ServerNotImpl serverCB;
+    public TCPServer(ServerNotImpl serverCB){
+        this.serverCB = serverCB;
+    }
     public void start() throws IOException {
         serverSocket = new ServerSocket(Constants.TCP_PORT);
         while(true){
-            Thread t = new Thread(new ClientHandler(serverSocket.accept()));
+            Thread t = new Thread(new ClientHandler(serverSocket.accept(), serverCB));
             t.start();
         }
     }
@@ -20,9 +23,8 @@ public class TCPServer {
     }
 
     public static void main(String[] args){
-        TCPServer server = new TCPServer();
+        TCPServer server = new TCPServer(null);
         try {
-
             server.start();
         } catch (IOException e) {
             e.printStackTrace();

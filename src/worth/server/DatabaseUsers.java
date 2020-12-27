@@ -11,67 +11,73 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DatabaseUsers {
     CopyOnWriteArrayList<User> userDb;
-
-
     public DatabaseUsers() {
         userDb = new CopyOnWriteArrayList<>();
     }
     // metodo che legge dal file al db
-    public void readDb() {
-        synchronized (this) {
-            Gson gson = new Gson();
-            BufferedReader br;
-            try {
-                br = new BufferedReader(new FileReader(Constants.dbPath));
-                Type type = new TypeToken<CopyOnWriteArrayList<User>>() {
-                }.getType();
-                userDb = gson.fromJson(br, type);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+    public synchronized void readDb() {
+        Gson gson = new Gson();
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(Constants.dbPath));
+            Type type = new TypeToken<CopyOnWriteArrayList<User>>() {
+            }.getType();
+            userDb = gson.fromJson(br, type);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
     // metodo che aggiunge un utente, se assente
-    public boolean addUser(User usr) {
-        synchronized (this){
-            if(userDb == null)
-                userDb = new CopyOnWriteArrayList<>();
-            return userDb.addIfAbsent(usr);
-        }
-
+    public synchronized boolean addUser(User usr) {
+        if(userDb == null)
+            userDb = new CopyOnWriteArrayList<>();
+        return userDb.addIfAbsent(usr);
     }
     // metodo che scrive sul file le modifiche al database degli utenti
-    public int writeDb() {
-        synchronized (this) {
-            Writer writer;
-            try {
-                writer = new FileWriter(Constants.dbPath);
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                gson.toJson(userDb, writer);
-                writer.flush();
-                writer.close();
-                return 1;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return 0;
-            }
+    public synchronized int writeDb() {
+        Writer writer;
+        try {
+            writer = new FileWriter(Constants.dbPath);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(userDb, writer);
+            writer.flush();
+            writer.close();
+            return 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
         }
     }
 
-    public boolean cercaUtente(User usr){
-        synchronized (this) {
-            return this.userDb.contains(usr);
-        }
+    public synchronized boolean cercaUtente(User usr){
+        return this.userDb.contains(usr);
     }
-    public void setStatus(User usr, String status){
-        synchronized (this){
-            userDb.get(userDb.indexOf(usr)).setStato(status);
-            writeDb();
-        }
+    public synchronized void setStatus(User usr, String status){
+        userDb.get(userDb.indexOf(usr)).setStato(status);
+        writeDb();
     }
-    public CopyOnWriteArrayList<User> getUserDb() {
-        synchronized (this) {
-            return userDb;
+    public synchronized CopyOnWriteArrayList<User> getUserDb() {
+        return userDb;
+    }
+
+    public synchronized String getListStatus(){
+        String result = "";
+        for(User u : userDb){
+            result += u.getNickName() + ": "+u.getStato() + "?";
         }
+        return result;
+    }
+
+    public synchronized String getOnlineListStatus(){
+        String result = "";
+        for(User u : userDb){
+            if(u.getStato().equals("online"))
+                result += u.getNickName() + ": "+u.getStato() + "?";
+        }
+        return result;
+    }
+
+    public synchronized int dbLength(){
+        return userDb.size();
     }
 }

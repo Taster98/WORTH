@@ -56,10 +56,18 @@ public class RegistrationServer implements RegistrationInterface {
             Registry registry = LocateRegistry.getRegistry(30001);
             registry.rebind("RegistrationInterface", stub);
 
+            // Gestione callback notifiche
+            ServerNotImpl serverCB = new ServerNotImpl();
+            NotificaServer stubCB = (NotificaServer) UnicastRemoteObject.exportObject(serverCB, 39000);
+            String name = "Server";
+            LocateRegistry.createRegistry(5000);
+            Registry registryCB = LocateRegistry.getRegistry(5000);
+            registryCB.bind(name, stubCB);
+            // Ora voglio lanciare un thread a cui passo il mio serverCB che gestirà la callback
             System.err.println("Server ready.");
 
-            // Avvio server TCP
-            TCPServer server = new TCPServer();
+            // Avvio server TCP, passandogli il callback server
+            TCPServer server = new TCPServer(serverCB);
             server.start();
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
