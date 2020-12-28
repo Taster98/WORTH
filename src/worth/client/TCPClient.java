@@ -14,7 +14,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class TCPClient {
     private Socket clientSocket;
@@ -96,14 +95,17 @@ public class TCPClient {
                 data = exec[1].split(" ", 2);
                 try {
                     this.startConnection();
-                    System.out.println(loginUser(data[0], data[1]));
-                    // Gestisco callback
-                    Registry registry = LocateRegistry.getRegistry(5000);
-                    String name = "Server";
-                    NotificaServer server =(NotificaServer) registry.lookup(name);
-                    NotificaClient callbackObj =  new NotificaImpl();
-                    NotificaClient stub = (NotificaClient) UnicastRemoteObject.exportObject(callbackObj, 0);
-                    server.register(stub);
+                    String res = loginUser(data[0], data[1]);
+                    System.out.println(res);
+                    if(res.contains("Login success!")) {
+                        // Gestisco callback
+                        Registry registry = LocateRegistry.getRegistry(5000);
+                        String name = "Server";
+                        NotificaServer server = (NotificaServer) registry.lookup(name);
+                        NotificaClient callbackObj = new NotificaImpl();
+                        NotificaClient stub = (NotificaClient) UnicastRemoteObject.exportObject(callbackObj, 0);
+                        server.register(stub);
+                    }
                 } catch (IOException | NotBoundException e) {
                     e.printStackTrace();
                 }

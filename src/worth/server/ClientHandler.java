@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;;
-import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
@@ -131,7 +130,8 @@ public class ClientHandler implements Runnable{
             out = new PrintWriter(clientSocket.getOutputStream(),true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             while(true) {
-                actionHandler(in.readLine());
+                if(in != null)
+                    actionHandler(in.readLine());
             }
         } catch (IOException e) {
             e.printStackTrace();

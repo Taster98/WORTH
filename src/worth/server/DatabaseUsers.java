@@ -50,7 +50,9 @@ public class DatabaseUsers {
     }
 
     public synchronized boolean cercaUtente(User usr){
-        return this.userDb.contains(usr);
+        if(this.userDb != null)
+            return this.userDb.contains(usr);
+        else return false;
     }
     public synchronized void setStatus(User usr, String status){
         userDb.get(userDb.indexOf(usr)).setStato(status);

@@ -33,7 +33,6 @@ public class ServerNotImpl extends RemoteObject implements NotificaServer {
     }
 
     private synchronized void compute(String usrs) throws RemoteException{
-        System.out.println("Starting callback");
         for(NotificaClient c : userList){
             c.notifyUsers(usrs);
         }
