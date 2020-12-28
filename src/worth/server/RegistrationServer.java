@@ -1,5 +1,6 @@
 package worth.server;
 
+import worth.Constants;
 import worth.RegistrationInterface;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -64,7 +65,7 @@ public class RegistrationServer implements RegistrationInterface {
             Registry registryCB = LocateRegistry.getRegistry(5000);
             registryCB.bind(name, stubCB);
             // Ora voglio lanciare un thread a cui passo il mio serverCB che gestirà la callback
-            System.err.println("Server ready.");
+            System.err.println(Constants.ANSI_CYAN+"Server ready."+Constants.ANSI_RESET);
 
             // Avvio server TCP, passandogli il callback server
             TCPServer server = new TCPServer(serverCB);

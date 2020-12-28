@@ -54,6 +54,13 @@ public class DatabaseUsers {
             return this.userDb.contains(usr);
         else return false;
     }
+
+    public synchronized User getUtente(User usr){
+        if(this.userDb != null){
+            return userDb.get(userDb.indexOf(usr));
+        }
+        return null;
+    }
     public synchronized void setStatus(User usr, String status){
         userDb.get(userDb.indexOf(usr)).setStato(status);
         writeDb();
@@ -67,6 +74,7 @@ public class DatabaseUsers {
         for(User u : userDb){
             result += u.getNickName() + ": "+u.getStato() + "?";
         }
+        result = result.subSequence(0, result.length()-1).toString();
         return result;
     }
 
@@ -76,10 +84,7 @@ public class DatabaseUsers {
             if(u.getStato().equals("online"))
                 result += u.getNickName() + ": "+u.getStato() + "?";
         }
+        result = result.subSequence(0, result.length()-1).toString();
         return result;
-    }
-
-    public synchronized int dbLength(){
-        return userDb.size();
     }
 }

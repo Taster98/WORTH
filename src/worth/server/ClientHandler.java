@@ -34,88 +34,125 @@ public class ClientHandler implements Runnable{
     }
     private void actionHandler(String action){
         // Qui posso avere diverse azioni da voler fare;
-        if(action == null) throw new NullPointerException();
+        if(action == null) {
+            return; //se l'azione è vuota esco
+        }
         if(action.equals("")) throw new IllegalArgumentException();
         // Ora che sono certo che la stringa non sia vuota:
         String[] data = action.split(" ", 2); // in data[0] ho il comando
         try {
             switch (data[0]) {
                 case "login":
-                    userDb.readDb();
-                    // Se c'è già un utente loggato non devo fare nulla
-                    if(!logged) {
-                        String[] info = data[1].split(" ", 2); //in info[0] ho il nickname, in info[1] ho la psw
-                        String psw = Crittografia.hashMe(info[1]);
-                        // Creo l'utente
-                        utente.setNickName(info[0]);
-                        utente.setPassword(psw);
-                        // cerco l'utente se è presente nel db
-                        if (userDb.cercaUtente(utente)) {
-                            //prelevo l'utente
-                            int index_found = userDb.getUserDb().indexOf(utente);
-                            User found = userDb.getUserDb().get(index_found);
-                            // devo controllare la password
-                            if (found.passwordMatch(utente.getPassword())) {
-                                //La password è corretta ma ancora non ho finito:
-                                // Se è già online non può accedere.
-                                if (found.getStato().equals("online")) {
-                                    out.println(Constants.ANSI_RED +"User is already connected!"+Constants.ANSI_RESET);
-                                    return;
-                                } else {
-                                    // SONO QUI E HO FATTO BENE
-                                    out.println(Constants.ANSI_GREEN +"Login success! Welcome back " + utente.getNickName()+Constants.ANSI_RESET);
-                                    // Devo aggiornare il database
-                                    userDb.setStatus(utente, "online");
-                                    serverCB.update(userDb.getListStatus());
-                                    // Setto il flag logged
-                                    logged = true;
-                                }
+                    // Il comando deve avere 2 argomenti: se ne ha uno solo, o solo due, stampo wrong usage
+                    if(data.length == 2) {
+                        // Se c'è già un utente loggato non devo fare nulla
+                        if (!logged) {
+                            userDb.readDb(); //<-- FIXARE QUESTO
+                            String[] info = data[1].split(" ", 2); //in info[0] ho il nickname, in info[1] ho la psw
+                            String psw = Crittografia.hashMe(info[1]);
+                            // Creo l'utente
+                            utente.setNickName(info[0]);
+                            utente.setPassword(psw);
+                            // cerco l'utente se è presente nel db
+                            if (userDb.cercaUtente(utente)) {
+                                //prelevo l'utente
+                                int index_found = userDb.getUserDb().indexOf(utente);
+                                User found = userDb.getUserDb().get(index_found);
+                                // devo controllare la password
+                                if (found.passwordMatch(utente.getPassword())) {
+                                    //La password è corretta ma ancora non ho finito:
+                                    // Se è già online non può accedere.
+                                    if (found.getStato().equals("online")) {
+                                        out.println(Constants.ANSI_RED + "User is already connected!" + Constants.ANSI_RESET);
+                                        return;
+                                    } else {
+                                        // SONO QUI E HO FATTO BENE
+                                        out.println(Constants.ANSI_GREEN + "Login success! Welcome back " + utente.getNickName() + Constants.ANSI_RESET);
+                                        // Devo aggiornare il database
+                                        userDb.setStatus(utente, "online");
+                                        userDb.writeDb();
+                                        serverCB.update(userDb.getListStatus());
+                                        // Setto il flag logged
+                                        logged = true;
+                                    }
 
+                                } else {
+                                    // PASSWORD ERRATA
+                                    out.println(Constants.ANSI_RED + "Password is wrong!" + Constants.ANSI_RESET);
+                                    break;
+                                }
                             } else {
-                                // PASSWORD ERRATA
-                                out.println(Constants.ANSI_RED +"Password is wrong!"+Constants.ANSI_RESET);
-                                break;
+                                // UTENTE NON ESISTE
+                                out.println(Constants.ANSI_RED + "This username doesn't exist!" + Constants.ANSI_RESET);
+                                return;
                             }
                         } else {
-                            // UTENTE NON ESISTE
-                            out.println(Constants.ANSI_RED +"This username doesn't exist!"+Constants.ANSI_RESET);
+                            // SONO GIÀ COLLEGATO CON UN ACCOUNT
+                            out.println(Constants.ANSI_RED + "You must logout from current account in order to login with another one!" + Constants.ANSI_RESET);
                             return;
                         }
                     }else{
-                        // SONO GIÀ COLLEGATO CON UN ACCOUNT
-                        out.println(Constants.ANSI_RED +"You must logout from current account in order to login with another one!" + Constants.ANSI_RESET);
+                        out.println(Constants.ANSI_RED + "Wrong usage: try with login [nickname] [password]"+ Constants.ANSI_RESET);
                         return;
                     }
                     break;
                 case "logout":
-                    if(logged){
-                        if(!utente.getNickName().equals("") && userDb.cercaUtente(utente)){
-                            userDb.setStatus(utente,"offline");
-                            logged = false;
-                            serverCB.update(userDb.getListStatus());
-                            out.println(Constants.ANSI_GREEN +"Logout successful!" + Constants.ANSI_RESET);
+                    if(data.length == 2) {
+                        if (logged) {
+                            userDb.readDb();
+                            String nick = data[1];
+                            User usr = new User();
+                            usr.setNickName(nick);
+
+                            if (!nick.equals("") && userDb.cercaUtente(usr)) {
+                                if(usr.getNickName().equals(utente.getNickName())) {
+                                    usr = userDb.getUtente(usr);
+                                    userDb.setStatus(usr, "offline");
+                                    logged = false;
+                                    userDb.writeDb();
+                                    serverCB.update(userDb.getListStatus());
+                                    out.println(Constants.ANSI_GREEN + "Logout successful!" + Constants.ANSI_RESET);
+                                }else{
+                                    // NICKNAME NON GIUSTO!
+                                    out.println(Constants.ANSI_RED + "Invalid nickname!" + Constants.ANSI_RESET);
+                                    return;
+                                }
+                            }else{
+                                // NICKNAME NON GIUSTO!
+                                out.println(Constants.ANSI_RED + "Invalid nickname!" + Constants.ANSI_RESET);
+                                return;
+                            }
+                        } else {
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't logout without login first!" + Constants.ANSI_RESET);
+                            return;
                         }
                     }else{
-                        // NON SONO LOGGATO!
-                        out.println(Constants.ANSI_RED +"You can't logout without login first!" + Constants.ANSI_RESET);
+                        out.println(Constants.ANSI_RED + "Wrong usage: try with logout [nickname]"+ Constants.ANSI_RESET);
                         return;
                     }
                     break;
                 case "users":
-                    if(logged){
-                        String toPrint = userDb.getListStatus();
-                        out.println(toPrint);
-                    }else{
-                        // NON SONO LOGGATO!
-                        out.println(Constants.ANSI_RED +"You can't perform this without login first!" + Constants.ANSI_RESET);
+                    if(data.length == 1) {
+                        if (logged) {
+                            userDb.readDb();
+                            String toPrint = userDb.getListStatus();
+                            out.println(toPrint);
+                        } else {
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
                     }
                     break;
                 case "online":
-                    if(logged){
-                        out.println(Constants.ANSI_GREEN+userDb.getOnlineListStatus()+Constants.ANSI_RESET);
-                    }else{
-                        // NON SONO LOGGATO!
-                        out.println(Constants.ANSI_RED +"You can't perform this without login first!" + Constants.ANSI_RESET);
+                    if(data.length == 1) {
+                        if (logged) {
+                            userDb.readDb();
+                            out.println(Constants.ANSI_GREEN + userDb.getOnlineListStatus() + Constants.ANSI_RESET);
+                        } else {
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
                     }
                     break;
             }
@@ -130,8 +167,10 @@ public class ClientHandler implements Runnable{
             out = new PrintWriter(clientSocket.getOutputStream(),true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             while(true) {
-                if(in != null)
-                    actionHandler(in.readLine());
+                if(in != null) {
+                    String rdln = in.readLine();
+                    actionHandler(rdln);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

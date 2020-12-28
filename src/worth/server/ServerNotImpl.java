@@ -8,20 +8,28 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ServerNotImpl extends RemoteObject implements NotificaServer {
     // Lista di utenti registrati
-    CopyOnWriteArrayList<NotificaClient> userList;
-
+    CopyOnWriteArrayList<String> userList;
+    CopyOnWriteArrayList<NotificaClient> clientList;
     public ServerNotImpl(){
         super();
+        clientList = new CopyOnWriteArrayList<>();
         userList = new CopyOnWriteArrayList<>();
     }
     @Override
-    public synchronized void register(NotificaClient client) throws RemoteException {
-        if(userList.addIfAbsent(client)) System.out.println("Client registered");
+    public synchronized void register(NotificaClient client, String nick) throws RemoteException {
+        if(!userList.contains(nick)){
+            userList.add(nick);
+            clientList.add(client);
+            System.out.println("Client registered");
+        }
     }
 
     @Override
-    public synchronized void unregister(NotificaClient client) throws RemoteException {
-        if(userList.remove(client)){
+    public synchronized void unregister(NotificaClient client, String nick) throws RemoteException {
+        if(userList.contains(nick)){
+            int i = userList.indexOf(nick);
+            userList.remove(nick);
+            clientList.remove(i);
             System.out.println("Client unregistered successfully");
         }else{
             System.out.println("Unable to unregister client");
@@ -33,7 +41,7 @@ public class ServerNotImpl extends RemoteObject implements NotificaServer {
     }
 
     private synchronized void compute(String usrs) throws RemoteException{
-        for(NotificaClient c : userList){
+        for(NotificaClient c : clientList){
             c.notifyUsers(usrs);
         }
     }
