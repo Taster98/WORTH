@@ -1,14 +1,16 @@
 package worth.server;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import worth.Constants;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.net.Socket;;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ClientHandler implements Runnable{
     private Socket clientSocket;
@@ -17,6 +19,8 @@ public class ClientHandler implements Runnable{
     private Scanner sc;
     // riferimento al database
     private DatabaseUsers userDb;
+    // riferimento alla lista progetti
+    private CopyOnWriteArrayList<String> projects;
     // variabile di controllo per far sì che un client si connetta solo con un user alla volta
     private boolean logged;
     // utente collegato a questo thread
@@ -31,7 +35,43 @@ public class ClientHandler implements Runnable{
         userDb.readDb();
         utente = new User();
         this.serverCB = serverCB;
+        this.projects = new CopyOnWriteArrayList<>();
     }
+    //funzione che scrive nel file con la lista di progetti
+    private synchronized void readProjects(){
+        Gson gson = new Gson();
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(Constants.fileProgettiPath));
+            Type type = new TypeToken<CopyOnWriteArrayList<String>>() {
+            }.getType();
+            projects = gson.fromJson(br, type);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    //funzione che legge dal file la lista dei progetti
+    public synchronized int writeProjects() {
+        Writer writer;
+        try {
+            writer = new FileWriter(Constants.fileProgettiPath);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(projects, writer);
+            writer.flush();
+            writer.close();
+            return 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    //funzione che aggiunge un progetto
+    public synchronized boolean addProject(String prj) {
+        if(projects == null)
+            projects = new CopyOnWriteArrayList<>();
+        return projects.addIfAbsent(prj);
+    }
+
     private void actionHandler(String action){
         // Qui posso avere diverse azioni da voler fare;
         if(action == null) {
@@ -150,6 +190,48 @@ public class ClientHandler implements Runnable{
                             userDb.readDb();
                             out.println(Constants.ANSI_GREEN + userDb.getOnlineListStatus() + Constants.ANSI_RESET);
                         } else {
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
+                case "createProject":
+                    if(data.length == 2){
+                        if(logged){
+                            //leggo i progetti dal file
+                            readProjects();
+                            //aggiungo il progetto al file
+                            if(addProject(data[1])){
+                                //Se invece il progetto con quel nome non esisteva ed è quindi andato a buon fine, posso continuare.
+                                //Devo quindi creare un oggetto di tipo Project
+                                Project p = new Project(data[1]);
+                                //Aggiungo l'utente creatore alla lista di utenti del progetto
+                                p.addUser(utente);
+                                //Creo la directory
+                                String dir = p.createDir(data[1]);
+                                //Creo i 5 file dentro la directory appena creata, che rappresentano le 5 liste
+                                if(dir != null){
+                                    if(p.generateLists(dir)){
+                                        //Qui dentro ho finito, quindi salvo la lista corrente di tutti i progetti e in più stampo risultato positivo.
+                                        writeProjects();
+                                        //Scrivo anche l'utente creatore nella lista utenti
+                                        if(p.writeUserList(dir)){
+                                            out.println(Constants.ANSI_GREEN + "Project '"+data[1]+"' created successfully!" + Constants.ANSI_RESET);
+                                        }else{
+                                            out.println(Constants.ANSI_RED + "Error while writing users file. Please try again." +Constants.ANSI_RESET);
+                                        }
+
+                                    }else{
+                                        out.println(Constants.ANSI_RED + "Error while creating files. Please try again." +Constants.ANSI_RESET);
+                                    }
+                                }else{
+                                    out.println(Constants.ANSI_RED + "Error while creating directory. Please try again." +Constants.ANSI_RESET);
+                                }
+                            }else{
+                                // PROGETTO GIÀ ESISTENTE
+                                out.println(Constants.ANSI_RED + "Error while creating project. Try using a different name." + Constants.ANSI_RESET);
+                            }
+                        }else{
                             // NON SONO LOGGATO!
                             out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
                         }

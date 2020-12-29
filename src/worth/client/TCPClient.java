@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -21,6 +20,7 @@ public class TCPClient {
     private PrintWriter out;
     private BufferedReader in;
     private boolean logged;
+
     public TCPClient() {
         this.logged = false;
     }
@@ -35,11 +35,11 @@ public class TCPClient {
     }
 
     public void stopConnection() throws IOException {
-        if(in != null)
+        if (in != null)
             in.close();
-        if(out != null)
+        if (out != null)
             out.close();
-        if(clientSocket != null)
+        if (clientSocket != null)
             clientSocket.close();
     }
 
@@ -49,22 +49,29 @@ public class TCPClient {
     }
 
     public String logoutUser(String nickname) throws IOException {
-        out.println("logout " +nickname);
+        out.println("logout " + nickname);
         return in.readLine();
     }
 
     private String listUsers(String str) throws IOException {
-        if(str == null){
+        if (str == null) {
             out.println("users");
-        }else{
+        } else {
             out.println("online");
         }
         return in.readLine();
     }
 
-    String prevCommand = "";
-    /* @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
-    account corrente */
+    private String createProject(String projectName) throws IOException {
+        out.println("createProject "+projectName);
+        return in.readLine();
+    }
+
+    /*
+     @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
+     account corrente
+     @REQUIRE: il nome del progetto non deve avere spazi
+     */
     public void commandInterpreter(String cmd) throws IOException, NotBoundException {
         if (cmd == null) return;
         if (cmd.equals("")) return;
@@ -83,24 +90,24 @@ public class TCPClient {
         NotificaClient stubCB = (NotificaClient) UnicastRemoteObject.exportObject(callbackObj, 0);
         switch (exec[0]) {
             case "help":
-                if(exec.length == 1) {
+                if (exec.length == 1) {
                     System.out.println(Constants.ANSI_YELLOW + Constants.HELP + Constants.ANSI_RESET);
-                }else{
-                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'help'"+Constants.ANSI_RESET);
+                } else {
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'help'" + Constants.ANSI_RESET);
                 }
                 break;
             case "version":
-                if(exec.length == 1){
+                if (exec.length == 1) {
                     System.out.println(Constants.VERSION);
-                }else{
-                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'version'"+Constants.ANSI_RESET);
+                } else {
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'version'" + Constants.ANSI_RESET);
                 }
                 break;
             case "register":
-                if(exec.length == 2) {
+                if (exec.length == 2) {
                     if (!logged) {
                         data = exec[1].split(" ", 2);
-                        if(data.length == 2) {
+                        if (data.length == 2) {
                             try {
                                 Registry registry = LocateRegistry.getRegistry(30001);
                                 RegistrationInterface stub = (RegistrationInterface) registry.lookup("RegistrationInterface");
@@ -113,20 +120,20 @@ public class TCPClient {
                                 System.err.println(Constants.ANSI_RED + "Client exception: " + e.toString() + Constants.ANSI_RESET);
                                 e.printStackTrace();
                             }
-                        }else{
-                            System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'register [nickname] [password]'"+Constants.ANSI_RESET);
+                        } else {
+                            System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'register [nickname] [password]'" + Constants.ANSI_RESET);
                         }
                     } else {
                         System.out.println(Constants.ANSI_RED + "You must logout in order to register a new account!" + Constants.ANSI_RESET);
                     }
-                }else{
-                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'register [nickname] [password]'"+Constants.ANSI_RESET);
+                } else {
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'register [nickname] [password]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "login":
-                if(exec.length == 2) {
+                if (exec.length == 2) {
                     data = exec[1].split(" ", 2); // "user pass" -> {"user", "pass"}
-                    if(data.length == 2) {
+                    if (data.length == 2) {
                         try {
                             this.startConnection();
                             String res = loginUser(data[0], data[1]);
@@ -138,23 +145,23 @@ public class TCPClient {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }else{
-                        System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'login [nickname] [password]'"+Constants.ANSI_RESET);
+                    } else {
+                        System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'login [nickname] [password]'" + Constants.ANSI_RESET);
                     }
-                }else{
-                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'login [nickname] [password]'"+Constants.ANSI_RESET);
+                } else {
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'login [nickname] [password]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "clear":
-                if(exec.length == 1) {
+                if (exec.length == 1) {
                     System.out.print("\033[H\033[2J");
                     System.out.flush();
-                }else{
-                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'clear'"+Constants.ANSI_RESET);
+                } else {
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'clear'" + Constants.ANSI_RESET);
                 }
                 break;
             case "logout":
-                if(exec.length == 2) {
+                if (exec.length == 2) {
                     String nick = exec[1];
                     try {
                         this.startConnection();
@@ -167,12 +174,12 @@ public class TCPClient {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }else {
-                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'logout [nickname]'"+Constants.ANSI_RESET);
+                } else {
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'logout [nickname]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "users":
-                if(exec.length == 1) {
+                if (exec.length == 1) {
                     try {
                         this.startConnection();
                         String toPrint = listUsers(null);
@@ -181,12 +188,12 @@ public class TCPClient {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }else{
-                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'users'"+Constants.ANSI_RESET);
+                } else {
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'users'" + Constants.ANSI_RESET);
                 }
                 break;
             case "online":
-                if(exec.length == 1) {
+                if (exec.length == 1) {
                     try {
                         this.startConnection();
                         String toPrint = listUsers("online");
@@ -195,28 +202,45 @@ public class TCPClient {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'online'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "createProject":
+                if(exec.length == 2){
+                    String projectName = exec[1];
+                    if(!projectName.equals("") && !projectName.contains(" ")) {
+                        try {
+                            this.startConnection();
+                            String toPrint = createProject(projectName);
+                            System.out.println(toPrint);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "Wrong projectName. Try to use a projectName without spaces." + Constants.ANSI_RESET);
+                    }
                 }else{
-                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'online'"+Constants.ANSI_RESET);
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'createProject [projectName]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "exit":
-                if(exec.length == 1) {
+                if (exec.length == 1) {
                     this.stopConnection();
                     System.exit(0);
                 }
                 break;
             default:
-                System.out.println(Constants.ANSI_PURPLE+"'"+cmd+"'"+Constants.ANSI_RESET+Constants.ANSI_RED + " is not a valid command. Type 'help' to see the usage."+Constants.ANSI_RESET);
+                System.out.println(Constants.ANSI_PURPLE + "'" + cmd + "'" + Constants.ANSI_RESET + Constants.ANSI_RED + " is not a valid command. Type 'help' to see the usage." + Constants.ANSI_RESET);
         }
-        prevCommand = cmd;
     }
 
     public static void main(String[] args) {
-        System.out.println(Constants.ANSI_GREEN +"Welcome to WORTH. To login, just type 'login username password'.\nif you need help on what you can do, just type 'help'."+Constants.ANSI_RESET);
+        System.out.println(Constants.ANSI_GREEN + "Welcome to WORTH. To login, just type 'login username password'.\nif you need help on what you can do, just type 'help'." + Constants.ANSI_RESET);
         String inputText = "";
         TCPClient client = new TCPClient();
         while (!inputText.equals("exit")) {
-            System.out.print(Constants.ANSI_GREEN + "> "+Constants.ANSI_RESET);
+            System.out.print(Constants.ANSI_GREEN + "> " + Constants.ANSI_RESET);
             Scanner sc = new Scanner(System.in);
             inputText = sc.nextLine();
             try {
@@ -227,5 +251,4 @@ public class TCPClient {
         }
 
     }
-
 }

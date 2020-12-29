@@ -12,10 +12,19 @@ public final class Constants {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
+    //Percorso database utenti registrati
     public static final String dbPath = "worth/server/Database/userDb.json";
+    //Percorso database dei progetti creati
+    public static final String progettiPath = "worth/server/Database/progetti/";
+    //Percorso del file dei progetti esistenti
+    public static final String fileProgettiPath = progettiPath+"listaProgetti.json";
+
+    //Porta del server TCP
     public static final int TCP_PORT = 6666;
+    //Indirizzo del server TCP (in questo caso è l'indirizzo locale)
     public static final String LOCALHOST_IP = "127.0.0.1";
-    public static final String IP_CHAT = ""; // da scegliere
+
+    //Testo del comando di help
     public static final String HELP = "Welcome to WORTH.\n" +
             "Here is the complete command list:\n\n" +
             "\u001B[35m register [nickname] [password] \u001B[0m -> register a new user with [nickname] and [password]\n" +
@@ -27,5 +36,6 @@ public final class Constants {
             "\u001B[35m version \u001B[0m -> show current version of WORTH.\n" +
             "\u001B[35m clear \u001B[0m -> clear the window from things\n" +
             "\u001B[35m exit \u001B[0m -> exit from the program";
-    public static final String VERSION = " WORTH version 0.1\n2020 Luigi Gesuele";
+    //Testo del comando della versione
+    public static final String VERSION = "\u001B[36m WORTH version 0.1\n \u001B[32m 2020 Luigi Gesuele \u001B[0m";
 }
