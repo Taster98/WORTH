@@ -254,6 +254,24 @@ public class ClientHandler implements Runnable{
                         }
                     }
                     break;
+                case "showMembers":
+                    if(data.length == 2){
+                        if(logged){
+                            userDb.readDb();
+                            //deve essere membro del progetto per poter mostrare i membri del progetto
+                            if(userDb.isMember(data[1],utente)){
+                                //qui allora posso leggere la lista di membri
+                                out.println(Constants.ANSI_GREEN + userDb.getMemberList(data[1]) + Constants.ANSI_RESET);
+                            }else{
+                                // NON AMMESSO!
+                                out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
+                            }
+                        }else{
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
             }
         } catch (NoSuchAlgorithmException | IOException e){
             e.printStackTrace();

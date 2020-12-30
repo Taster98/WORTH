@@ -72,6 +72,15 @@ public class TCPClient {
         return in.readLine();
     }
 
+    private String showMembers(String projectName) throws IOException{
+        out.println("showMembers "+projectName);
+        return in.readLine();
+    }
+
+    private String addMember(String projectName, String nickUser) throws IOException{
+        out.println("addMember "+projectName+" "+nickUser);
+        return in.readLine();
+    }
     /*
      @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
      account corrente
@@ -233,10 +242,29 @@ public class TCPClient {
                 if(exec.length == 1){
                     this.startConnection();
                     String toPrint = listProjects();
-                    toPrint = Constants.ANSI_GREEN + "Lista dei tuoi progetti:\n" + toPrint.replace("?","\n")+Constants.ANSI_RESET;
+                    toPrint = Constants.ANSI_GREEN + "Your project list:\n" + toPrint.replace("?","\n")+Constants.ANSI_RESET;
                     System.out.println(toPrint);
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'listProjects'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "showMembers":
+                if(exec.length == 2){
+                    this.startConnection();
+                    String toPrint = showMembers(exec[1]);
+                    toPrint = Constants.ANSI_GREEN + "Members of "+exec[1]+" project:\n"+toPrint.replace("?","\n")+Constants.ANSI_RESET;
+                    System.out.println(toPrint);
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showMembers [projectName]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "addMember":
+                if(exec.length == 3){
+                    this.startConnection();
+                    String toPrint = addMember(exec[1], exec[2]);
+                    System.out.println(toPrint);
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addMember [projectName] [nickUser]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "exit":

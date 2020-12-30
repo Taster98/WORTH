@@ -14,7 +14,7 @@ public class RegistrationServer implements RegistrationInterface {
     public RegistrationServer() {
         userDb = new DatabaseUsers();
         // la lettura non è atomica, va fatta in mutua esclusione
-        userDb.readDb();
+        //userDb.readDb();
     }
 
     // Ritorna 7 se la registrazione è andata a buon fine
@@ -27,6 +27,7 @@ public class RegistrationServer implements RegistrationInterface {
 
         //La password va hashata, per non memorizzarla in chiaro
         try {
+            userDb.readDb();
             String newPwd = Crittografia.hashMe(password);
             // Creo ora un utente
             User user = new User();
@@ -37,7 +38,7 @@ public class RegistrationServer implements RegistrationInterface {
             andata = userDb.addUser(user);
             // la scrittura non è atomica, va fatta in mutua esclusione
             userDb.writeDb();
-            userDb.readDb();
+            //userDb.readDb();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

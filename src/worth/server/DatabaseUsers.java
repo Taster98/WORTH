@@ -109,4 +109,24 @@ public class DatabaseUsers {
             res = res.subSequence(0,res.length()-1).toString();
         return res;
     }
+
+    public synchronized boolean isMember(String projName, User usr){
+        CopyOnWriteArrayList<String> lista = getUtente(usr).getProjectList();
+        return lista.contains(projName);
+    }
+
+    public synchronized String getMemberList(String projName){
+        CopyOnWriteArrayList<String> lista;
+        String fullPath = Constants.progettiPath + projName;
+        Project p = new Project(projName);
+        p.readUserList(fullPath);
+        lista = p.getUserList();
+        String res = "";
+        for(String s : lista){
+            res += s + "?";
+        }
+        if(res.length() >0)
+                res = res.subSequence(0, res.length()-1).toString();
+        return res;
+    }
 }

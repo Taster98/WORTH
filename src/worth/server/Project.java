@@ -35,7 +35,9 @@ public class Project {
     public synchronized boolean addUser(String usr){
         return this.userList.addIfAbsent(usr);
     }
-
+    public synchronized CopyOnWriteArrayList<String> getUserList(){
+        return this.userList;
+    }
     public synchronized String createDir(String projectName){
         try {
             Path path = Paths.get(Constants.progettiPath+projectName+"/");
@@ -62,7 +64,7 @@ public class Project {
     }
 
     //funzione che scrive nel file con la lista di utenti del progetto
-    private synchronized void readUserList(String path){
+    public synchronized void readUserList(String path){
         Gson gson = new Gson();
         BufferedReader br;
         try {
