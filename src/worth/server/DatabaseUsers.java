@@ -105,7 +105,8 @@ public class DatabaseUsers {
         for(String s : lista){
             res += s + "?";
         }
-        res = res.subSequence(0,res.length()-1).toString();
+        if(res.length() >0)
+            res = res.subSequence(0,res.length()-1).toString();
         return res;
     }
 }
