@@ -81,6 +81,11 @@ public class TCPClient {
         out.println("addMember "+projectName+" "+nickUser);
         return in.readLine();
     }
+
+    private String addCard(String projectName, String cardName, String description) throws IOException{
+        out.println("addCard "+projectName + " "+cardName+" "+description);
+        return in.readLine();
+    }
     /*
      @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
      account corrente
@@ -270,6 +275,20 @@ public class TCPClient {
                     }
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addMember [projectName] [nickUser]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "addCard":
+                if(exec.length == 2){
+                    String[] cmds = exec[1].split(" ",3);
+                    if(cmds.length == 3){
+                        this.startConnection();
+                        String toPrint = addCard(cmds[0], cmds[1], cmds[2]);
+                        System.out.println(toPrint);
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addCard [projectName] [cardName] [description]'" + Constants.ANSI_RESET);
+                    }
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addCard [projectName] [cardName] [description]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "exit":

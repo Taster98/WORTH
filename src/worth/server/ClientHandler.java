@@ -301,6 +301,47 @@ public class ClientHandler implements Runnable{
                         }
                     }
                     break;
+                case "addCard":
+                    if(data.length == 2){
+                        if(logged){
+                            userDb.readDb();
+                            String[] cmds = data[1].split(" ",3); //projName, cardName, description
+                            if(cmds.length == 3){
+                                if(userDb.isMember(cmds[0],utente)){
+                                    //Devo controllare che la card non esista già
+                                    Project p = new Project(cmds[0]);
+                                    if(!p.doCardAlreadyExist(cmds[0],cmds[1])){
+                                        // a questo punto la card può esser creata e aggiunta
+                                        Card c = new Card(cmds[1]);
+                                        c.setCardDescription(cmds[2]);
+                                        //la card è stata creata, recupero la lista di cards (nella todolist):
+                                        p.readTodoList(Constants.progettiPath+cmds[0]);
+                                        if(p.addTodoList(c)) {
+                                            //scrivo i risultati
+                                            p.writeTodoList(Constants.progettiPath + cmds[0]);
+                                            //avviso l'esterno
+                                            out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " added successfully!" + Constants.ANSI_RESET);
+                                        }else{
+                                            // ESISTE GIÀ
+                                            out.println(Constants.ANSI_RED + "The card already exist! Choose another name." + Constants.ANSI_RESET);
+                                        }
+                                    }else{
+                                        // ESISTE GIÀ
+                                        out.println(Constants.ANSI_RED + "The card already exist! Choose another name." + Constants.ANSI_RESET);
+                                    }
+                                }else{
+                                    // NON AMMESSO!
+                                    out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
+                                }
+                            }else{
+                                out.println(Constants.ANSI_RED + "Invalid command!" + Constants.ANSI_RESET);
+                            }
+                        }else{
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
             }
         } catch (NoSuchAlgorithmException | IOException e){
             e.printStackTrace();
