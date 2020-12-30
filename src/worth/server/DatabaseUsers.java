@@ -87,4 +87,25 @@ public class DatabaseUsers {
         result = result.subSequence(0, result.length()-1).toString();
         return result;
     }
+
+    public synchronized boolean addProject(User usr, String projectName){
+       if(usr.getProjectList() == null){
+           usr.setProjectList(new CopyOnWriteArrayList<>());
+       }
+       boolean res = usr.getProjectList().addIfAbsent(projectName);
+       // Rimuovo dal database e lo reinserisco
+        userDb.remove(usr);
+        userDb.addIfAbsent(usr);
+        writeDb();
+        return res;
+    }
+    public synchronized String getUserProjectList(User usr){
+        CopyOnWriteArrayList<String> lista = getUtente(usr).getProjectList();
+        String res = "";
+        for(String s : lista){
+            res += s + "?";
+        }
+        res = res.subSequence(0,res.length()-1).toString();
+        return res;
+    }
 }

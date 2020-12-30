@@ -21,7 +21,7 @@ public class Project {
     private CopyOnWriteArrayList<Card> progressList;
     private CopyOnWriteArrayList<Card> tobeRevisedList;
     private CopyOnWriteArrayList<Card> doneList;
-    private CopyOnWriteArrayList<User> userList;
+    private CopyOnWriteArrayList<String> userList;
 
     public Project(String projectName){
         this.projectName = projectName;
@@ -29,10 +29,10 @@ public class Project {
         this.progressList = new CopyOnWriteArrayList<Card>();
         this.tobeRevisedList = new CopyOnWriteArrayList<Card>();
         this.doneList = new CopyOnWriteArrayList<Card>();
-        this.userList = new CopyOnWriteArrayList<User>();
+        this.userList = new CopyOnWriteArrayList<String>();
     }
 
-    public synchronized boolean addUser(User usr){
+    public synchronized boolean addUser(String usr){
         return this.userList.addIfAbsent(usr);
     }
 
@@ -67,7 +67,7 @@ public class Project {
         BufferedReader br;
         try {
             br = new BufferedReader(new FileReader(path+"/userList.json"));
-            Type type = new TypeToken<CopyOnWriteArrayList<User>>() {
+            Type type = new TypeToken<CopyOnWriteArrayList<String>>() {
             }.getType();
             userList = gson.fromJson(br, type);
         } catch (FileNotFoundException e) {
@@ -89,6 +89,4 @@ public class Project {
             return false;
         }
     }
-
-
 }

@@ -67,6 +67,11 @@ public class TCPClient {
         return in.readLine();
     }
 
+    private String listProjects() throws IOException{
+        out.println("listProjects");
+        return in.readLine();
+    }
+
     /*
      @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
      account corrente
@@ -222,6 +227,16 @@ public class TCPClient {
                     }
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'createProject [projectName]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "listProjects":
+                if(exec.length == 1){
+                    this.startConnection();
+                    String toPrint = listProjects();
+                    toPrint = Constants.ANSI_GREEN + "Lista dei tuoi progetti:\n" + toPrint.replace("?","\n")+Constants.ANSI_RESET;
+                    System.out.println(toPrint);
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'listProjects'" + Constants.ANSI_RESET);
                 }
                 break;
             case "exit":

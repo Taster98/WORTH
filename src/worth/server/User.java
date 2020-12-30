@@ -1,17 +1,21 @@
 package worth.server;
 
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class User {
     private String nickName;
     private String password;
     // offline o online, serve per poi restituire la lista di online/offline
     private String stato;
+    // lista progetti di cui l'utente è membro
+    private CopyOnWriteArrayList<String> projectList;
 
     public User(){
         this.nickName = "";
         this.password = "";
         this.stato = "offline";
+        this.projectList = new CopyOnWriteArrayList<>();
     }
 
     public String getNickName() {
@@ -36,6 +40,14 @@ public class User {
 
     public void setStato(String stato) {
         this.stato = stato;
+    }
+
+    public CopyOnWriteArrayList<String> getProjectList() {
+        return projectList;
+    }
+
+    public void setProjectList(CopyOnWriteArrayList<String> projectList) {
+        this.projectList = projectList;
     }
 
     @Override

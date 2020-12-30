@@ -206,7 +206,7 @@ public class ClientHandler implements Runnable{
                                 //Devo quindi creare un oggetto di tipo Project
                                 Project p = new Project(data[1]);
                                 //Aggiungo l'utente creatore alla lista di utenti del progetto
-                                p.addUser(utente);
+                                p.addUser(utente.getNickName());
                                 //Creo la directory
                                 String dir = p.createDir(data[1]);
                                 //Creo i 5 file dentro la directory appena creata, che rappresentano le 5 liste
@@ -216,7 +216,13 @@ public class ClientHandler implements Runnable{
                                         writeProjects();
                                         //Scrivo anche l'utente creatore nella lista utenti
                                         if(p.writeUserList(dir)){
-                                            out.println(Constants.ANSI_GREEN + "Project '"+data[1]+"' created successfully!" + Constants.ANSI_RESET);
+                                            utente.setStato("online");
+                                            if(userDb.addProject(utente,data[1])){
+                                                userDb.readDb();
+                                                out.println(Constants.ANSI_GREEN + "Project '"+data[1]+"' created successfully!" + Constants.ANSI_RESET);
+                                            }else{
+                                                out.println(Constants.ANSI_RED + "Error while updating users file. Please try again." +Constants.ANSI_RESET);
+                                            }
                                         }else{
                                             out.println(Constants.ANSI_RED + "Error while writing users file. Please try again." +Constants.ANSI_RESET);
                                         }
@@ -232,6 +238,17 @@ public class ClientHandler implements Runnable{
                                 out.println(Constants.ANSI_RED + "Error while creating project. Try using a different name." + Constants.ANSI_RESET);
                             }
                         }else{
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
+                case "listProjects":
+                    if(data.length == 1) {
+                        if (logged) {
+                            userDb.readDb();
+                            out.println(Constants.ANSI_GREEN + userDb.getUserProjectList(utente) + Constants.ANSI_RESET);
+                        } else {
                             // NON SONO LOGGATO!
                             out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
                         }
