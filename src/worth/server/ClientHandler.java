@@ -272,6 +272,35 @@ public class ClientHandler implements Runnable{
                         }
                     }
                     break;
+                case "addMember":
+                    if(data.length == 2){
+                        if(logged){
+                            userDb.readDb();
+                            String[] cmds = data[1].split(" ",2);
+                            if(cmds.length == 2) {
+                                if (userDb.isMember(cmds[0], utente)) {
+                                    User usr = new User();
+                                    usr.setNickName(cmds[1]);
+                                    if (userDb.addMemberToList(cmds[0], usr)) {
+                                        // MEMBER ADDED
+                                        out.println(Constants.ANSI_GREEN + usr.getNickName() + " added successfully!" + Constants.ANSI_RESET);
+                                    } else {
+                                        // ALREADY IN
+                                        out.println(Constants.ANSI_RED + "The user is already inside this project!" + Constants.ANSI_RESET);
+                                    }
+                                } else {
+                                    // NON AMMESSO!
+                                    out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
+                                }
+                            }else{
+                                out.println(Constants.ANSI_RED + "Invalid command!" + Constants.ANSI_RESET);
+                            }
+                        }else{
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
             }
         } catch (NoSuchAlgorithmException | IOException e){
             e.printStackTrace();

@@ -259,10 +259,15 @@ public class TCPClient {
                 }
                 break;
             case "addMember":
-                if(exec.length == 3){
-                    this.startConnection();
-                    String toPrint = addMember(exec[1], exec[2]);
-                    System.out.println(toPrint);
+                if(exec.length == 2){
+                    String[] cmds = exec[1].split(" ",2);
+                    if(cmds.length == 2) {
+                        this.startConnection();
+                        String toPrint = addMember(cmds[0], cmds[1]);
+                        System.out.println(toPrint);
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addMember [projectName] [nickUser]'" + Constants.ANSI_RESET);
+                    }
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addMember [projectName] [nickUser]'" + Constants.ANSI_RESET);
                 }

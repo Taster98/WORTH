@@ -89,13 +89,14 @@ public class DatabaseUsers {
     }
 
     public synchronized boolean addProject(User usr, String projectName){
-       if(usr.getProjectList() == null){
-           usr.setProjectList(new CopyOnWriteArrayList<>());
-       }
-       boolean res = usr.getProjectList().addIfAbsent(projectName);
-       // Rimuovo dal database e lo reinserisco
-        userDb.remove(usr);
-        userDb.addIfAbsent(usr);
+        User aux = userDb.get(userDb.indexOf(usr));
+        if(aux.getProjectList() == null){
+           aux.setProjectList(new CopyOnWriteArrayList<>());
+        }
+        boolean res = aux.getProjectList().addIfAbsent(projectName);
+        // Rimuovo dal database e lo reinserisco
+        userDb.remove(aux);
+        userDb.addIfAbsent(aux);
         writeDb();
         return res;
     }
@@ -127,6 +128,24 @@ public class DatabaseUsers {
         }
         if(res.length() >0)
                 res = res.subSequence(0, res.length()-1).toString();
+        return res;
+    }
+    public synchronized boolean addMemberToList(String projName, User usr){
+        CopyOnWriteArrayList<String> list;
+        String fullPath = Constants.progettiPath + projName;
+        Project p = new Project(projName);
+        p.readUserList(fullPath);
+        list = p.getUserList();
+        boolean res;
+        if(list.addIfAbsent(usr.getNickName())){
+            res = true;
+        }else{
+            res = false;
+        }
+        p.writeUserList(fullPath);
+        // Devo ora scriverlo anche nel file classico, nella lista
+        readDb();
+        addProject(usr, projName);
         return res;
     }
 }
