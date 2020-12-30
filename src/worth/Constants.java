@@ -32,7 +32,8 @@ public final class Constants {
             "\u001B[35m logout [nickname] \u001B[0m -> sign out the user [nickname] from worth\n" +
             "\u001B[35m users \u001B[0m -> list users registered to worth\n" +
             "\u001B[35m online \u001B[0m -> list only online registered users\n" +
-            "\u001B[35m createProject [projectName] \u001B[0m -> create a new project" +
+            "\u001B[35m createProject [projectName] \u001B[0m -> create a new project\n" +
+            "\u001B[35m listProjects \u001B[0m -> list all projects of current user\n" +
             "\u001B[35m help \u001B[0m -> show this command list.\n" +
             "\u001B[35m version \u001B[0m -> show current version of WORTH.\n" +
             "\u001B[35m clear \u001B[0m -> clear the window from things\n" +

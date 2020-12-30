@@ -15,3 +15,4 @@ To run server
 ./runclient.sh
 ```
 
+In the client CLI, just type <span style="color:lightgreen">'help'</span> to see the list of commands and their usages.
