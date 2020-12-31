@@ -286,8 +286,35 @@ public class ClientHandler implements Runnable{
                                 // A questo punto posso mostrare le cards
                                 Project p = new Project(data[1]);
                                 p.readAllLists(Constants.progettiPath+data[1]);
-                                String toSend = p.getCardList(data[1]);
+                                String toSend = p.getCardList();
                                 out.println(Constants.ANSI_GREEN +toSend+Constants.ANSI_RESET);
+                            }else{
+                                // NON AMMESSO!
+                                out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
+                            }
+                        }else{
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
+                case "showCard":
+                    if(data.length == 2){
+                        if(logged){
+                            userDb.readDb();
+                            String[] cmds = data[1].split(" ",2);
+                            if(userDb.isMember(cmds[0],utente)){
+                                //Ora devo controllare che la card esista da qualche parte
+                                Project p = new Project(cmds[0]);
+                                p.readAllLists(Constants.progettiPath+cmds[0]);
+                                if(p.doCardAlreadyExist(cmds[1])){
+                                    // Se la card esiste allora posso accedere alle suee info
+                                    String toSend = p.getCardInfo(cmds[1]);
+                                    out.println(Constants.ANSI_GREEN +toSend+ Constants.ANSI_RESET);
+                                }else{
+                                    // NON ESISTE LA CARD!
+                                    out.println(Constants.ANSI_RED + "Card "+cmds[1]+" does not exist!"+ Constants.ANSI_RESET);
+                                }
                             }else{
                                 // NON AMMESSO!
                                 out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
@@ -307,12 +334,11 @@ public class ClientHandler implements Runnable{
                                 if(userDb.isMember(cmds[0],utente)){
                                     //Devo controllare che la card non esista già
                                     Project p = new Project(cmds[0]);
-                                    if(!p.doCardAlreadyExist(cmds[0],cmds[1])){
+                                    p.readTodoList(Constants.progettiPath+cmds[0]);
+                                    if(!p.doCardAlreadyExist(cmds[1])){
                                         // a questo punto la card può esser creata e aggiunta
                                         Card c = new Card(cmds[1]);
                                         c.setCardDescription(cmds[2]);
-                                        //la card è stata creata, recupero la lista di cards (nella todolist):
-                                        p.readTodoList(Constants.progettiPath+cmds[0]);
                                         if(p.addTodoList(c)) {
                                             //scrivo i risultati
                                             p.writeTodoList(Constants.progettiPath + cmds[0]);

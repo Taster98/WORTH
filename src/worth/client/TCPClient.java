@@ -95,6 +95,10 @@ public class TCPClient {
         out.println("showCards "+projName);
         return in.readLine();
     }
+    private String showCard(String projName, String cardName) throws IOException{
+        out.println("showCard "+projName+" "+cardName);
+        return in.readLine();
+    }
     private String addCard(String projectName, String cardName, String description) throws IOException{
         out.println("addCard "+projectName + " "+cardName+" "+description);
         return in.readLine();
@@ -305,6 +309,20 @@ public class TCPClient {
                     System.out.println(toPrint.replace("?","\n"));
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showCards [projectName]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "showCard":
+                if(exec.length == 2){
+                    String[] cmds = exec[1].split(" ",2);
+                    if(cmds.length == 2){
+                        this.startConnection();
+                        String toPrint = showCard(cmds[0], cmds[1]);
+                        System.out.println(toPrint.replace("?","\n"));
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showCard [projectName] [cardName]'" + Constants.ANSI_RESET);
+                    }
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showCard [projectName] [cardName]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "addCard":

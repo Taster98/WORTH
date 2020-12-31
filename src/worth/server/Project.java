@@ -179,183 +179,103 @@ public class Project {
             return false;
         }
     }
-    public synchronized List<Card> getAllCards(String projectName){
-        Gson gson = new Gson();
-        BufferedReader br;
-        try {
-            //Devo leggere tutte le 4 liste di cards
-            List<Card> lista1, lista2, lista3, lista4;
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/todoList.json"));
-            Type type = new TypeToken<ArrayList<Card>>() {
-            }.getType();
-            lista1 = gson.fromJson(br, type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/progressList.json"));
-            lista2 = gson.fromJson(br,type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/tobeRevisedList.json"));
-            lista3 = gson.fromJson(br, type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/doneList.json"));
-            lista4 = gson.fromJson(br, type);
-
-            List<Card> result = new ArrayList<>();
-            if(lista1 != null)
-                result.addAll(lista1);
-            if(lista2 != null)
-                result.addAll(lista2);
-            if(lista3 != null)
-                result.addAll(lista3);
-            if(lista4 != null)
-                result.addAll(lista4);
-            return result;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public synchronized List<Card> getAllCards(){
+        List<Card> result = new ArrayList<>();
+        if(todoList != null)
+            result.addAll(todoList);
+        if(progressList != null)
+            result.addAll(progressList);
+        if(tobeRevisedList != null)
+            result.addAll(tobeRevisedList);
+        if(doneList != null)
+            result.addAll(doneList);
+        return result;
     }
 
-    public synchronized String getCardList(String projectName){
-        Gson gson = new Gson();
-        BufferedReader br;
-        try {
-            //Devo leggere tutte le 4 liste di cards
-            List<Card> lista1, lista2, lista3, lista4;
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/todoList.json"));
-            Type type = new TypeToken<ArrayList<Card>>() {
-            }.getType();
-            lista1 = gson.fromJson(br, type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/progressList.json"));
-            lista2 = gson.fromJson(br,type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/tobeRevisedList.json"));
-            lista3 = gson.fromJson(br, type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/doneList.json"));
-            lista4 = gson.fromJson(br, type);
-
-            List<String> result = new ArrayList<>();
-            if(lista1 != null) {
-                for (Card c : lista1) {
-                    result.add(c.getCardName());
-                }
+    public synchronized String getCardList(){
+        List<String> result = new ArrayList<>();
+        if(todoList != null) {
+            for (Card c : todoList) {
+                result.add(c.getCardName());
             }
-            if(lista2 != null) {
-                for (Card c : lista2) {
-                    result.add(c.getCardName());
-                }
-            }
-            if(lista3 != null) {
-                for (Card c : lista3) {
-                    result.add(c.getCardName());
-                }
-            }
-            if(lista4 != null) {
-                for (Card c : lista4) {
-                    result.add(c.getCardName());
-                }
-            }
-            //converto tutta la lista in un'unica gigantesca stringa
-            String output = "";
-            for(String s : result){
-                output += s + "?";
-            }
-            return output;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
-        return null;
+        if(progressList != null) {
+            for (Card c : progressList) {
+                result.add(c.getCardName());
+            }
+        }
+        if(tobeRevisedList != null) {
+            for (Card c : tobeRevisedList) {
+                result.add(c.getCardName());
+            }
+        }
+        if(doneList != null) {
+            for (Card c : doneList) {
+                result.add(c.getCardName());
+            }
+        }
+        //converto tutta la lista in un'unica gigantesca stringa
+        String output = "";
+        for(String s : result){
+            output += s + "?";
+        }
+        return output;
     }
 
-    public synchronized String getCardInfo(String projectName, String cardName){
-        Gson gson = new Gson();
-        BufferedReader br;
-        try {
-            //Devo leggere tutte le 4 liste di cards
-            List<Card> lista1, lista2, lista3, lista4;
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/todoList.json"));
-            Type type = new TypeToken<ArrayList<Card>>() {
-            }.getType();
-            lista1 = gson.fromJson(br, type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/progressList.json"));
-            lista2 = gson.fromJson(br,type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/tobeRevisedList.json"));
-            lista3 = gson.fromJson(br, type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/doneList.json"));
-            lista4 = gson.fromJson(br, type);
-
-            Card c = new Card(cardName);
-            boolean found = false;
-            if(lista1.contains(c)){
-                c = lista1.get(lista1.indexOf(c));
-                found = true;
-            }else if(lista2.contains(c)){
-                c = lista1.get(lista1.indexOf(c));
-                found = true;
-            }else if(lista3.contains(c)){
-                c = lista1.get(lista1.indexOf(c));
-                found = true;
-            }else if(lista4.contains(c)){
-                c = lista1.get(lista1.indexOf(c));
-                found = true;
-            }
-            if(found){
-                return "card name: "+c.getCardName()+"?card description: "+c.getCardDescription()+"?current list: "+c.getCurrentListName()+"?";
-            }else{
-                return null;
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+    public synchronized String getCardInfo(String cardName){
+        Card c = new Card(cardName);
+        boolean found = false;
+        if(todoList != null && todoList.contains(c)){
+            c = todoList.get(todoList.indexOf(c));
+            found = true;
+        }else if(progressList != null && progressList.contains(c)){
+            c = progressList.get(progressList.indexOf(c));
+            found = true;
+        }else if(tobeRevisedList != null && tobeRevisedList.contains(c)){
+            c = tobeRevisedList.get(tobeRevisedList.indexOf(c));
+            found = true;
+        }else if(doneList != null && doneList.contains(c)){
+            c = doneList.get(doneList.indexOf(c));
+            found = true;
         }
-        return null;
+        if(found){
+            return "card name: "+c.getCardName()+"?card description: "+c.getCardDescription()+"?current list: "+c.getCurrentListName()+"?";
+        }else{
+            return null;
+        }
     }
 
-    public synchronized String getCardHistory(String projectName, String cardName){
-        Gson gson = new Gson();
-        BufferedReader br;
-        try {
-            //Devo leggere tutte le 4 liste di cards
-            List<Card> lista1, lista2, lista3, lista4;
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/todoList.json"));
-            Type type = new TypeToken<ArrayList<Card>>() {
-            }.getType();
-            lista1 = gson.fromJson(br, type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/progressList.json"));
-            lista2 = gson.fromJson(br,type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/tobeRevisedList.json"));
-            lista3 = gson.fromJson(br, type);
-            br = new BufferedReader(new FileReader(Constants.progettiPath+projectName+"/doneList.json"));
-            lista4 = gson.fromJson(br, type);
-
-            Card c = new Card(cardName);
-            boolean found = false;
-            if(lista1.contains(c)){
-                c = lista1.get(lista1.indexOf(c));
-                found = true;
-            }else if(lista2.contains(c)){
-                c = lista1.get(lista1.indexOf(c));
-                found = true;
-            }else if(lista3.contains(c)){
-                c = lista1.get(lista1.indexOf(c));
-                found = true;
-            }else if(lista4.contains(c)){
-                c = lista1.get(lista1.indexOf(c));
-                found = true;
-            }
-            if(found){
-                String res = "";
-                for(String s : c.getHistory()){
-                    res += s + "?";
-                }
-                return res;
-            }else{
-                return null;
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+    public synchronized String getCardHistory(String cardName){
+        Card c = new Card(cardName);
+        boolean found = false;
+        if(todoList != null && todoList.contains(c)){
+            c = todoList.get(todoList.indexOf(c));
+            found = true;
+        }else if(progressList != null && progressList.contains(c)){
+            c = progressList.get(progressList.indexOf(c));
+            found = true;
+        }else if(tobeRevisedList != null && tobeRevisedList.contains(c)){
+            c = tobeRevisedList.get(tobeRevisedList.indexOf(c));
+            found = true;
+        }else if(doneList != null && doneList.contains(c)){
+            c = doneList.get(doneList.indexOf(c));
+            found = true;
         }
-        return null;
+        if(found){
+            String res = "";
+            for(String s : c.getHistory()){
+                res += s + "?";
+            }
+            return res;
+        }else{
+            return null;
+        }
     }
 
-    public synchronized boolean doCardAlreadyExist(String projectName, String cardName){
+    public synchronized boolean doCardAlreadyExist(String cardName){
         Card c = new Card(cardName);
         List<Card> aux;
-        if((aux = getAllCards(projectName)) != null){
+        if((aux = getAllCards()) != null){
             return aux.contains(c);
         }
         return false;
