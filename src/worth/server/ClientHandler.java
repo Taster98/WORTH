@@ -278,6 +278,26 @@ public class ClientHandler implements Runnable{
                         }
                     }
                     break;
+                case "showCards":
+                    if(data.length == 2){
+                        if(logged){
+                            userDb.readDb();
+                            if(userDb.isMember(data[1],utente)){
+                                // A questo punto posso mostrare le cards
+                                Project p = new Project(data[1]);
+                                p.readAllLists(Constants.progettiPath+data[1]);
+                                String toSend = p.getCardList(data[1]);
+                                out.println(Constants.ANSI_GREEN +toSend+Constants.ANSI_RESET);
+                            }else{
+                                // NON AMMESSO!
+                                out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
+                            }
+                        }else{
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
                 case "addCard":
                     if(data.length == 2){
                         if(logged){

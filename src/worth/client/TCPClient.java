@@ -91,7 +91,10 @@ public class TCPClient {
         out.println("addMember "+projectName+" "+nickUser);
         return in.readLine();
     }
-
+    private String showCards(String projName) throws IOException{
+        out.println("showCards "+projName);
+        return in.readLine();
+    }
     private String addCard(String projectName, String cardName, String description) throws IOException{
         out.println("addCard "+projectName + " "+cardName+" "+description);
         return in.readLine();
@@ -209,13 +212,17 @@ public class TCPClient {
                 break;
             case "users":
                 if (exec.length == 1) {
-                    try {
-                        //this.startConnection();
-                        String toPrint = listUsers(null);
-                        //toPrint = Constants.ANSI_GREEN + "Lista utenti aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
-                        System.out.println(Constants.ANSI_GREEN + toPrint+ Constants.ANSI_RESET);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if(logged) {
+                        try {
+                            //this.startConnection();
+                            String toPrint = listUsers(null);
+                            //toPrint = Constants.ANSI_GREEN + "Lista utenti aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
+                            System.out.println(Constants.ANSI_GREEN + toPrint + Constants.ANSI_RESET);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "You must login to perform this action!" + Constants.ANSI_RESET);
                     }
                 } else {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'users'" + Constants.ANSI_RESET);
@@ -223,13 +230,17 @@ public class TCPClient {
                 break;
             case "online":
                 if (exec.length == 1) {
-                    try {
-                        this.startConnection();
-                        String toPrint = listUsers("online");
-                        //toPrint = Constants.ANSI_GREEN + "Lista utenti online aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
-                        System.out.println(Constants.ANSI_GREEN + toPrint+ Constants.ANSI_RESET);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if(logged) {
+                        try {
+                            //this.startConnection();
+                            String toPrint = listUsers("online");
+                            //toPrint = Constants.ANSI_GREEN + "Lista utenti online aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
+                            System.out.println(Constants.ANSI_GREEN + toPrint + Constants.ANSI_RESET);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "You must login to perform this action!" + Constants.ANSI_RESET);
                     }
                 } else {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'online'" + Constants.ANSI_RESET);
@@ -285,6 +296,15 @@ public class TCPClient {
                     }
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addMember [projectName] [nickUser]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "showCards":
+                if(exec.length == 2){
+                    this.startConnection();
+                    String toPrint = showCards(exec[1]);
+                    System.out.println(toPrint.replace("?","\n"));
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showCards [projectName]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "addCard":

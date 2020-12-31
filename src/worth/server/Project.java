@@ -129,6 +129,56 @@ public class Project {
             return false;
         }
     }
+    //funzione che legge tutte le liste di cards
+    public synchronized void readAllLists(String path){
+        Gson gson = new Gson();
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(path+"/todoList.json"));
+            Type type = new TypeToken<CopyOnWriteArrayList<Card>>() {
+            }.getType();
+            todoList = gson.fromJson(br, type);
+            br = new BufferedReader(new FileReader(path+"/progressList.json"));
+            progressList = gson.fromJson(br, type);
+            br = new BufferedReader(new FileReader(path+"/tobeRevisedList.json"));
+            tobeRevisedList = gson.fromJson(br, type);
+            br = new BufferedReader(new FileReader(path+"/doneList.json"));
+            doneList = gson.fromJson(br, type);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //funzione che scrive tutte le liste di cards
+    public synchronized boolean writeAllLists(String path){
+        Writer writer;
+        try {
+            writer = new FileWriter(path+"/todoList.json");
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(todoList, writer);
+            writer.flush();
+            writer.close();
+            writer = new FileWriter(path+"/progressList.json");
+            gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(todoList, writer);
+            writer.flush();
+            writer.close();
+            writer = new FileWriter(path+"/tobeRevisedList.json");
+            gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(todoList, writer);
+            writer.flush();
+            writer.close();
+            writer = new FileWriter(path+"/doneList.json");
+            gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(todoList, writer);
+            writer.flush();
+            writer.close();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     public synchronized List<Card> getAllCards(String projectName){
         Gson gson = new Gson();
         BufferedReader br;
@@ -180,19 +230,26 @@ public class Project {
             lista4 = gson.fromJson(br, type);
 
             List<String> result = new ArrayList<>();
-            for(Card c : lista1){
-                result.add(c.getCardName());
+            if(lista1 != null) {
+                for (Card c : lista1) {
+                    result.add(c.getCardName());
+                }
             }
-            for(Card c : lista2){
-                result.add(c.getCardName());
+            if(lista2 != null) {
+                for (Card c : lista2) {
+                    result.add(c.getCardName());
+                }
             }
-            for(Card c : lista3){
-                result.add(c.getCardName());
+            if(lista3 != null) {
+                for (Card c : lista3) {
+                    result.add(c.getCardName());
+                }
             }
-            for(Card c : lista4){
-                result.add(c.getCardName());
+            if(lista4 != null) {
+                for (Card c : lista4) {
+                    result.add(c.getCardName());
+                }
             }
-
             //converto tutta la lista in un'unica gigantesca stringa
             String output = "";
             for(String s : result){
