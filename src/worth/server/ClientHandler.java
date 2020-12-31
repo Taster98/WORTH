@@ -376,20 +376,49 @@ public class ClientHandler implements Runnable{
                                     Project p = new Project(cmds[0]);
                                     p.readAllLists(Constants.progettiPath+cmds[0]);
                                     int res;
-                                    if((res = p.moveCard(cmds[1],cmds[2],cmds[3])) == 7 || res == 1){
-                                        p.readAllLists(Constants.progettiPath+cmds[0]);
+                                    if((res = p.moveCard(cmds[1],cmds[2],cmds[3])) == 7){
+                                        //p.readAllLists(Constants.progettiPath+cmds[0]);
                                         //Se sono qui sono riuscito, scrivo tutto
-                                        //p.writeAllLists(Constants.progettiPath+cmds[0]);
                                         //Stampo risultato
-                                        out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " moved successfully!" +res+ Constants.ANSI_RESET);
+                                        out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " moved successfully!" + Constants.ANSI_RESET);
                                     }else{
                                         if(res == -1){
-                                            out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists! "+res + Constants.ANSI_RESET);
+                                            out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists! Error "+res + Constants.ANSI_RESET);
                                         }else if(res == 0){
-                                            out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists! "+res + Constants.ANSI_RESET);
+                                            out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists! Error "+res + Constants.ANSI_RESET);
                                         }
-                                        // NON RIUSCITA!
-                                        //out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists!" + Constants.ANSI_RESET);
+                                    }
+                                }else{
+                                    // NON AMMESSO!
+                                    out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
+                                }
+                            }else{
+                                out.println(Constants.ANSI_RED + "Invalid command!" + Constants.ANSI_RESET);
+                            }
+                        }else{
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
+                case "getHistory":
+                    if(data.length == 2){
+                        if(logged){
+                            userDb.readDb();
+                            String[] cmds = data[1].split(" ",2); //projName, cardName
+                            if(cmds.length == 2){
+                                //Controllo che sia membro
+                                if(userDb.isMember(cmds[0],utente)){
+                                    Project p = new Project(cmds[0]);
+                                    p.readAllLists(Constants.progettiPath+cmds[0]);
+                                    //Controllo che la card esista
+                                    String output;
+                                    if((output = p.getCardHistory(cmds[1])) != null){
+                                        //Altrimenti stampo la storia
+                                        out.println(Constants.ANSI_GREEN + output +Constants.ANSI_RESET);
+                                    }else{
+                                        // NON ESISTE LA CARD!
+                                        out.println(Constants.ANSI_RED + "Card "+cmds[1]+" does not exist!"+ Constants.ANSI_RESET);
                                     }
                                 }else{
                                     // NON AMMESSO!

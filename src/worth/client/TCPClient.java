@@ -10,6 +10,7 @@ import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class TCPClient {
@@ -107,6 +108,10 @@ public class TCPClient {
         out.println("moveCard "+projName+" "+cardName+" "+srcList +" "+destList);
         return in.readLine();
     }
+    private String getHistory(String projName, String cardName) throws IOException{
+        out.println("getHistory "+projName + " "+cardName);
+        return in.readLine();
+    }
     /*
      @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
      account corrente
@@ -128,6 +133,7 @@ public class TCPClient {
         NotificaClient callbackObj = new NotificaImpl();
         //NotificaImpl callbackObj = new NotificaImpl();
         NotificaClient stubCB = (NotificaClient) UnicastRemoteObject.exportObject(callbackObj, 0);
+        //Il comando non è case sensitive
         switch (exec[0]) {
             case "help":
                 if (exec.length == 1) {
@@ -254,7 +260,7 @@ public class TCPClient {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'online'" + Constants.ANSI_RESET);
                 }
                 break;
-            case "createProject":
+            case "createproject":
                 if(exec.length == 2){
                     String projectName = exec[1];
                     if(!projectName.equals("") && !projectName.contains(" ")) {
@@ -272,7 +278,7 @@ public class TCPClient {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'createProject [projectName]'" + Constants.ANSI_RESET);
                 }
                 break;
-            case "listProjects":
+            case "listprojects":
                 if(exec.length == 1){
                     this.startConnection();
                     String toPrint = listProjects();
@@ -282,7 +288,7 @@ public class TCPClient {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'listProjects'" + Constants.ANSI_RESET);
                 }
                 break;
-            case "showMembers":
+            case "showmembers":
                 if(exec.length == 2){
                     //this.startConnection();
                     String toPrint = showMembers(exec[1]);
@@ -292,7 +298,7 @@ public class TCPClient {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showMembers [projectName]'" + Constants.ANSI_RESET);
                 }
                 break;
-            case "addMember":
+            case "addmember":
                 if(exec.length == 2){
                     String[] cmds = exec[1].split(" ",2);
                     if(cmds.length == 2) {
@@ -306,7 +312,7 @@ public class TCPClient {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addMember [projectName] [nickUser]'" + Constants.ANSI_RESET);
                 }
                 break;
-            case "showCards":
+            case "showcards":
                 if(exec.length == 2){
                     this.startConnection();
                     String toPrint = showCards(exec[1]);
@@ -315,7 +321,7 @@ public class TCPClient {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showCards [projectName]'" + Constants.ANSI_RESET);
                 }
                 break;
-            case "showCard":
+            case "showcard":
                 if(exec.length == 2){
                     String[] cmds = exec[1].split(" ",2);
                     if(cmds.length == 2){
@@ -329,7 +335,7 @@ public class TCPClient {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showCard [projectName] [cardName]'" + Constants.ANSI_RESET);
                 }
                 break;
-            case "addCard":
+            case "addcard":
                 if(exec.length == 2){
                     String[] cmds = exec[1].split(" ",3);
                     if(cmds.length == 3){
@@ -343,7 +349,7 @@ public class TCPClient {
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addCard [projectName] [cardName] [description]'" + Constants.ANSI_RESET);
                 }
                 break;
-            case "moveCard":
+            case "movecard":
                 if(exec.length == 2){
                     String[] cmds = exec[1].split(" ", 4);
                     if(cmds.length == 4){
@@ -355,6 +361,20 @@ public class TCPClient {
                     }
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'moveCard [projectName] [cardName] {todoList, progressList, revisedList, doneList} {todoList, progressList, revisedList, doneList}'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "gethistory":
+                if(exec.length == 2){
+                    String[] cmds = exec[1].split(" ",2);
+                    if(cmds.length == 2){
+                        this.startConnection();
+                        String toPrint = getHistory(cmds[0],cmds[1]);
+                        System.out.println("History of "+cmds[1]+":\n"+toPrint.replace("?", "\n"));
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'getHistory [projectName] [cardName]'" + Constants.ANSI_RESET);
+                    }
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'getHistory [projectName] [cardName]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "exit":
@@ -376,8 +396,17 @@ public class TCPClient {
             System.out.print(Constants.ANSI_GREEN + "> " + Constants.ANSI_RESET);
             Scanner sc = new Scanner(System.in);
             inputText = sc.nextLine();
+            String[] broken = inputText.split(" ",2);
+            if(broken.length == 2)
+                inputText = broken[0].toLowerCase()+" "+broken[1];
+            else
+                inputText = broken[0].toLowerCase();
             try {
-                client.commandInterpreter(inputText);
+                if(inputText.contains("?")){
+                    System.out.println("Input must not contain special character '?'.");
+                }else{
+                    client.commandInterpreter(inputText);
+                }
             } catch (NotBoundException | IOException e) {
                 e.printStackTrace();
             }

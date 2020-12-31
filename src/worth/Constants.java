@@ -26,7 +26,7 @@ public final class Constants {
 
     //Testo del comando di help
     public static final String HELP = "Welcome to WORTH.\n" +
-            "Here is the complete command list:\n\n" +
+            "Here is the complete command list: \u001B[34m NOTICE: COMMANDS ARE NOT CASE SENSITIVE \u001B[0m \n\n" +
             "\u001B[35m register [nickname] [password] \u001B[0m -> register a new user with [nickname] and [password]\n" +
             "\u001B[35m login [nickname] [password] \u001B[0m -> login as the user [nickname] with password [password]\n" +
             "\u001B[35m logout [nickname] \u001B[0m -> sign out the user [nickname] from worth\n" +
