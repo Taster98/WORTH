@@ -57,7 +57,16 @@ public class Project {
         }
         return null;
     }
-
+    public synchronized boolean removeDir(File dir){
+        //File dir = new File(Constants.progettiPath+projectName+"/");
+        File[] content = dir.listFiles();
+        if (content != null) {
+            for (File file : content) {
+                removeDir(file);
+            }
+        }
+        return dir.delete();
+    }
     public synchronized boolean generateLists(String path){
         try{
             File todo = new File(path+"/todoList.json");
@@ -199,7 +208,11 @@ public class Project {
             result.addAll(doneList);
         return result;
     }
-
+    public synchronized List<Card> getDoneCards(){
+        if(this.doneList == null)
+            this.doneList = new CopyOnWriteArrayList<>();
+        return this.doneList;
+    }
     public synchronized String getCardList(){
         List<String> result = new ArrayList<>();
         if(todoList != null) {

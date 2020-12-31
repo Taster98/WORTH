@@ -100,6 +100,23 @@ public class DatabaseUsers {
         writeDb();
         return res;
     }
+
+    public synchronized boolean removeProject(User usr, String projName){
+        User aux = userDb.get(userDb.indexOf(usr));
+        if(aux.getProjectList() == null){
+            aux.setProjectList(new CopyOnWriteArrayList<>());
+        }
+        boolean res = aux.getProjectList().remove(projName);
+        //Cancello il progetto da tutti i membri e non solo da chi chiama la remove:
+        for(User u : userDb){
+            u.getProjectList().remove(projName);
+        }
+        // Rimuovo dal database e lo reinserisco
+        userDb.remove(aux);
+        userDb.addIfAbsent(aux);
+        writeDb();
+        return res;
+    }
     public synchronized String getUserProjectList(User usr){
         CopyOnWriteArrayList<String> lista = getUtente(usr).getProjectList();
         String res = "";

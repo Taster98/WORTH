@@ -112,10 +112,15 @@ public class TCPClient {
         out.println("getHistory "+projName + " "+cardName);
         return in.readLine();
     }
+    private String cancelProject(String projName) throws IOException{
+        out.println("cancelProject "+projName);
+        return in.readLine();
+    }
     /*
      @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
      account corrente
      @REQUIRE: il nome del progetto non deve avere spazi
+     @REQUIRE: l'input non deve contenere il carattere speciale ?
      */
     public void commandInterpreter(String cmd) throws IOException, NotBoundException {
         if (cmd == null) return;
@@ -375,6 +380,15 @@ public class TCPClient {
                     }
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'getHistory [projectName] [cardName]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "cancelproject":
+                if(exec.length == 2){
+                    this.startConnection();
+                    String toPrint = cancelProject(exec[1]);
+                    System.out.println(toPrint);
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'cancelProject [projectName]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "exit":

@@ -71,7 +71,12 @@ public class ClientHandler implements Runnable{
             projects = new CopyOnWriteArrayList<>();
         return projects.addIfAbsent(prj);
     }
-
+    //funzione che rimuove un progetto
+    public synchronized boolean removeProject(String prj) {
+        if(projects == null)
+            projects = new CopyOnWriteArrayList<>();
+        return projects.remove(prj);
+    }
     private void actionHandler(String action){
         // Qui posso avere diverse azioni da voler fare;
         if(action == null) {
@@ -433,6 +438,45 @@ public class ClientHandler implements Runnable{
                         }
                     }
                     break;
+                case "cancelProject":
+                    if(data.length == 2){
+                        if(logged){
+                            userDb.readDb();
+                            if(userDb.isMember(data[1],utente)){
+                                Project p = new Project(data[1]);
+                                p.readAllLists(Constants.progettiPath+data[1]);
+                                readProjects();
+                                //Se tutte le card sono done allora sì, sennò no
+                                //Se doneList è null e l'altra no, non posso sicuro cancellare
+                                if((p.getDoneCards() == null && p.getAllCards() != null) || (p.getAllCards() == null && p.getDoneCards() != null)){
+                                    // NON SI CANCELLA SENZA FARE!
+                                    out.println(Constants.ANSI_RED + "You can't cancel this project until all its cards are not in doneList! 1" + Constants.ANSI_RESET);
+                                }else{
+                                    if((p.getAllCards() == null && p.getDoneCards() == null) || (p.getDoneCards().isEmpty() && p.getAllCards().isEmpty()) || p.getAllCards().size() == p.getDoneCards().size() && p.getAllCards().equals(p.getDoneCards())){
+                                        //rimuovo da ogni utente il riferimento al progetto
+                                        userDb.removeProject(utente,data[1]);
+                                        userDb.writeDb();
+                                        //rimuovo dalla lista nel file
+                                        removeProject(data[1]);
+                                        writeProjects();
+                                        //rimuovo la directory
+                                        p.removeDir(new File(Constants.progettiPath+"/"+data[1]));
+                                        out.println(Constants.ANSI_GREEN + "Project removed successfully!" +Constants.ANSI_RESET);
+                                    }else{
+                                        // NON SI CANCELLA SENZA FARE!
+                                        out.println(Constants.ANSI_RED + "You can't cancel this project until all its cards are not in doneList! 2" + Constants.ANSI_RESET);
+                                    }
+                                }
+                            }else{
+                                // NON AMMESSO!
+                                out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
+                            }
+                        }else{
+                            // NON SONO LOGGATO!
+                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
+                        }
+                    }
+                    break;
             }
         } catch (NoSuchAlgorithmException | IOException e){
             e.printStackTrace();
@@ -447,7 +491,11 @@ public class ClientHandler implements Runnable{
             while(true) {
                 if(in != null) {
                     String rdln = in.readLine();
-                    actionHandler(rdln);
+                    if(rdln != null && !rdln.contains("?")) {
+                        actionHandler(rdln);
+                    }else if(rdln != null){
+                        System.out.println("Input must not contain special character '?'.");
+                    }
                 }
             }
         } catch (IOException e) {
