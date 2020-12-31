@@ -4,10 +4,7 @@ import worth.Constants;
 import worth.RegistrationInterface;
 import worth.server.NotificaServer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
@@ -54,12 +51,25 @@ public class TCPClient {
     }
 
     private String listUsers(String str) throws IOException {
+        File myFile = new File("userList.txt");
+        Scanner sc = new Scanner(myFile);
+        String output = "";
         if (str == null) {
-            out.println("users");
+            //Leggo tutti gli utenti
+            while (sc.hasNextLine()) {
+                String data = sc.nextLine();
+                output += data +"\n";
+            }
         } else {
-            out.println("online");
+            //Leggo solo gli utenti online
+            while (sc.hasNextLine()) {
+                String data = sc.nextLine();
+                if(data.contains("online"))
+                    output += data +"\n";
+            }
         }
-        return in.readLine();
+        sc.close();
+        return output;
     }
 
     private String createProject(String projectName) throws IOException {
@@ -200,10 +210,10 @@ public class TCPClient {
             case "users":
                 if (exec.length == 1) {
                     try {
-                        this.startConnection();
+                        //this.startConnection();
                         String toPrint = listUsers(null);
-                        toPrint = Constants.ANSI_GREEN + "Lista utenti aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
-                        System.out.println(toPrint);
+                        //toPrint = Constants.ANSI_GREEN + "Lista utenti aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
+                        System.out.println(Constants.ANSI_GREEN + toPrint+ Constants.ANSI_RESET);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -216,8 +226,8 @@ public class TCPClient {
                     try {
                         this.startConnection();
                         String toPrint = listUsers("online");
-                        toPrint = Constants.ANSI_GREEN + "Lista utenti online aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
-                        System.out.println(toPrint);
+                        //toPrint = Constants.ANSI_GREEN + "Lista utenti online aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
+                        System.out.println(Constants.ANSI_GREEN + toPrint+ Constants.ANSI_RESET);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -255,7 +265,7 @@ public class TCPClient {
                 break;
             case "showMembers":
                 if(exec.length == 2){
-                    this.startConnection();
+                    //this.startConnection();
                     String toPrint = showMembers(exec[1]);
                     toPrint = Constants.ANSI_GREEN + "Members of "+exec[1]+" project:\n"+toPrint.replace("?","\n")+Constants.ANSI_RESET;
                     System.out.println(toPrint);

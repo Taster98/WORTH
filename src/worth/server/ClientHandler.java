@@ -172,29 +172,6 @@ public class ClientHandler implements Runnable{
                         return;
                     }
                     break;
-                case "users":
-                    if(data.length == 1) {
-                        if (logged) {
-                            userDb.readDb();
-                            String toPrint = userDb.getListStatus();
-                            out.println(toPrint);
-                        } else {
-                            // NON SONO LOGGATO!
-                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
-                        }
-                    }
-                    break;
-                case "online":
-                    if(data.length == 1) {
-                        if (logged) {
-                            userDb.readDb();
-                            out.println(Constants.ANSI_GREEN + userDb.getOnlineListStatus() + Constants.ANSI_RESET);
-                        } else {
-                            // NON SONO LOGGATO!
-                            out.println(Constants.ANSI_RED + "You can't perform this without login first!" + Constants.ANSI_RESET);
-                        }
-                    }
-                    break;
                 case "createProject":
                     if(data.length == 2){
                         if(logged){
