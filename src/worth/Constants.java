@@ -36,10 +36,10 @@ public final class Constants {
             "\u001B[35m listProjects \u001B[0m -> list all projects of current user\n" +
             "\u001B[35m addMember [projectName] [nickname] \u001B[0m -> add [nickname] user to [projectName] project\n" +
             "\u001B[35m showMembers [projectName] \u001B[0m -> list all users of [projectName] project\n" +
-            "\u001B[35m showCards [projectName] \u001B[0m -> list all cards of [projectName] project\n" + //TODO
-            "\u001B[35m showCard [projectName] [cardName] \u001B[0m -> show informations about [cardName] card in [projectName] project\n" + //TODO
+            "\u001B[35m showCards [projectName] \u001B[0m -> list all cards of [projectName] project\n" +
+            "\u001B[35m showCard [projectName] [cardName] \u001B[0m -> show informations about [cardName] card in [projectName] project\n" +
             "\u001B[35m addCard [projectName] [cardName] [description] \u001B[0m -> add [cardName] to [projectName] with [description]\n" +
-            "\u001B[35m moveCard [projectName] [cardName] [srcList] [destList] \u001B[0m -> moves [cardName] of [projectName] project from [srcList] to [destList]\n" + //TODO
+            "\u001B[35m moveCard [projectName] [cardName] {todoList, progressList, revisedList, doneList} {todoList, progressList, revisedList, doneList} \u001B[0m -> moves [cardName] of [projectName] project from [srcList] to [destList].\n" + //TODO
             "\u001B[35m getHistory [projectName] [cardName] \u001B[0m -> show the history of [cardName] card in [projectName] project.\n" + //TODO
             "\u001B[35m cancelProject [projectName] \u001B[0m -> delete project [projectName].\n" + //TODO
             "\u001B[35m help \u001B[0m -> show this command list.\n" +

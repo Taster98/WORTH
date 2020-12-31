@@ -155,22 +155,30 @@ public class Project {
         try {
             writer = new FileWriter(path+"/todoList.json");
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(todoList, writer);
+            if(todoList != null) {
+                gson.toJson(todoList, writer);
+            }
             writer.flush();
             writer.close();
             writer = new FileWriter(path+"/progressList.json");
             gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(todoList, writer);
+            if(progressList != null) {
+                gson.toJson(progressList, writer);
+            }
             writer.flush();
             writer.close();
             writer = new FileWriter(path+"/tobeRevisedList.json");
             gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(todoList, writer);
+            if(tobeRevisedList != null) {
+                gson.toJson(tobeRevisedList, writer);
+            }
             writer.flush();
             writer.close();
             writer = new FileWriter(path+"/doneList.json");
             gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(todoList, writer);
+            if(doneList != null) {
+                gson.toJson(doneList, writer);
+            }
             writer.flush();
             writer.close();
             return true;
@@ -242,6 +250,69 @@ public class Project {
             return "card name: "+c.getCardName()+"?card description: "+c.getCardDescription()+"?current list: "+c.getCurrentListName()+"?";
         }else{
             return null;
+        }
+    }
+    public synchronized int moveCard(String cardName, String srcList, String destList){
+        CopyOnWriteArrayList<Card> listSrc;
+        CopyOnWriteArrayList<Card> listDest;
+        if(srcList.equals("todoList")){
+            if(this.todoList == null)
+                this.todoList = new CopyOnWriteArrayList<>();
+            listSrc = this.todoList;
+        }else if(srcList.equals("progressList")){
+            if(this.progressList == null)
+                this.progressList = new CopyOnWriteArrayList<>();
+            listSrc = this.progressList;
+        }else if(srcList.equals("revisedList")){
+            if(this.tobeRevisedList == null)
+                this.tobeRevisedList = new CopyOnWriteArrayList<>();
+            listSrc = this.tobeRevisedList;
+        }else if(srcList.equals("doneList")){
+            if(this.doneList == null)
+                this.doneList = new CopyOnWriteArrayList<>();
+            listSrc = this.doneList;
+        }else{
+            listSrc = null;
+        }
+
+        if(destList.equals("todoList")){
+            if(this.todoList == null)
+                this.todoList = new CopyOnWriteArrayList<>();
+            listDest = this.todoList;
+        }else if(destList.equals("progressList")){
+            if(this.progressList == null)
+                this.progressList = new CopyOnWriteArrayList<>();
+            listDest = this.progressList;
+        }else if(destList.equals("revisedList")){
+            if(this.tobeRevisedList == null)
+                this.tobeRevisedList = new CopyOnWriteArrayList<>();
+            listDest = this.tobeRevisedList;
+        }else if(destList.equals("doneList")){
+            if(this.doneList == null)
+                this.doneList = new CopyOnWriteArrayList<>();
+            listDest = this.doneList;
+        }else{
+            listDest = null;
+        }
+        if(listSrc != null && listDest != null){
+            //Controllo che le liste siano diverse; se fossero uguali non sposto nulla
+            if(listSrc != listDest){
+                //controllo che la lista src contiene la card da spostare
+                Card c = new Card(cardName);
+                if(listSrc.contains(c)){
+                    c = listSrc.get(listSrc.indexOf(c));
+                    c.setCurrentListName(destList);
+                    listDest.addIfAbsent(c);
+                    //writeAllLists(Constants.progettiPath+projectName);
+                    listSrc.remove(c);
+                    writeAllLists(Constants.progettiPath+projectName);
+                }else{
+                    return 0;
+                }
+            }
+            return 7;
+        }else{
+            return -1;
         }
     }
 

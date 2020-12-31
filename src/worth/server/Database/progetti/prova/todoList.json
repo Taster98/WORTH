@@ -1,18 +1,1 @@
-[
-  {
-    "cardName": "cardTest",
-    "cardDescription": "ciao ehehehe sono un test di prova di una card der cazzo deh zio caio",
-    "currentListName": "todoList",
-    "history": [
-      "todoList"
-    ]
-  },
-  {
-    "cardName": "pippo",
-    "cardDescription": "ciao sono una card di prova numero due ehehe",
-    "currentListName": "todoList",
-    "history": [
-      "todoList"
-    ]
-  }
-]
+[]

@@ -1,0 +1,13 @@
+[
+  {
+    "cardName": "cardTest",
+    "cardDescription": "ciao ehehehe sono un test di prova di una card der cazzo deh zio caio",
+    "currentListName": "doneList",
+    "history": [
+      "todoList",
+      "doneList",
+      "todoList",
+      "progressList"
+    ]
+  }
+]

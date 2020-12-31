@@ -103,6 +103,10 @@ public class TCPClient {
         out.println("addCard "+projectName + " "+cardName+" "+description);
         return in.readLine();
     }
+    private String moveCard(String projName, String cardName, String srcList, String destList) throws IOException{
+        out.println("moveCard "+projName+" "+cardName+" "+srcList +" "+destList);
+        return in.readLine();
+    }
     /*
      @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
      account corrente
@@ -337,6 +341,20 @@ public class TCPClient {
                     }
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'addCard [projectName] [cardName] [description]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "moveCard":
+                if(exec.length == 2){
+                    String[] cmds = exec[1].split(" ", 4);
+                    if(cmds.length == 4){
+                        this.startConnection();
+                        String toPrint = moveCard(cmds[0], cmds[1], cmds[2], cmds[3]);
+                        System.out.println(toPrint);
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'moveCard [projectName] [cardName] {todoList, progressList, revisedList, doneList} {todoList, progressList, revisedList, doneList}'" + Constants.ANSI_RESET);
+                    }
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'moveCard [projectName] [cardName] {todoList, progressList, revisedList, doneList} {todoList, progressList, revisedList, doneList}'" + Constants.ANSI_RESET);
                 }
                 break;
             case "exit":
