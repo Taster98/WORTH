@@ -26,7 +26,7 @@ public class Card {
             history.add(this.currentListName);
         }
         this.currentListName = currentListName;
-        history.add(this.currentListName);
+        //history.add(this.currentListName);
     }
 
     public synchronized String getCardName() {

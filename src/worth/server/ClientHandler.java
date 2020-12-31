@@ -439,7 +439,7 @@ public class ClientHandler implements Runnable{
                                         readProjects();
                                         readIp();
                                         out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " moved successfully!" + Constants.ANSI_RESET);
-                                        UDPServer.sendMessage(utente.getNickName()+" moved card "+cmds[1]+"from "+cmds[2]+" to "+cmds[3],ipAddresses.get(projects.indexOf(cmds[0])),Constants.port);
+                                        UDPServer.sendMessage(utente.getNickName()+" moved card "+cmds[1]+" from "+cmds[2]+" to "+cmds[3],ipAddresses.get(projects.indexOf(cmds[0])),Constants.port);
                                     }else{
                                         if(res == -1){
                                             out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists! Error "+res + Constants.ANSI_RESET);
