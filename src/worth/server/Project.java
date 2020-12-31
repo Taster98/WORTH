@@ -7,6 +7,7 @@ import worth.Constants;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +25,8 @@ public class Project {
     private CopyOnWriteArrayList<Card> tobeRevisedList;
     private CopyOnWriteArrayList<Card> doneList;
     private CopyOnWriteArrayList<String> userList;
-
+    //Aggiungo l'ip per il multicast
+    private InetAddress multicastIp;
     public Project(String projectName){
         this.projectName = projectName;
         this.todoList = new CopyOnWriteArrayList<Card>();

@@ -3,24 +3,20 @@
     "nickName": "luca",
     "password": "880e042d271f08cd3c456f28704702a6b0ad1c7b442f257bf40578112c8e6ffb",
     "stato": "offline",
-    "projectList": [
-      "prova"
-    ]
+    "projectList": []
   },
   {
     "nickName": "fulvio",
     "password": "df39220189ca8225b3ef4bb8f3654b2217c11b056cb764a806586f3b95530052",
     "stato": "offline",
-    "projectList": [
-      "prova"
-    ]
+    "projectList": []
   },
   {
     "nickName": "luiggi",
     "password": "b133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2",
     "stato": "offline",
     "projectList": [
-      "prova"
+      "progettone"
     ]
   }
 ]

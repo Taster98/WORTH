@@ -3,14 +3,17 @@ package worth.client;
 import worth.Constants;
 import worth.RegistrationInterface;
 import worth.server.NotificaServer;
+import worth.server.UDPServer;
 
 import java.io.*;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Locale;
 import java.util.Scanner;
 
 public class TCPClient {
@@ -116,11 +119,30 @@ public class TCPClient {
         out.println("cancelProject "+projName);
         return in.readLine();
     }
+    private String readChat(String projName) throws IOException{
+        out.println("readChat "+projName);
+        return in.readLine();
+    }
+    private String sendMessage(String projName, String message) throws IOException{
+        out.println("sendMessage "+projName + " "+message);
+        return in.readLine();
+    }
+    Thread chat;
+    private void avviaChat(String ip){
+        UDPThread uth = new UDPThread(ip);
+        chat = new Thread(uth);
+        chat.start();
+    }
+    private void fermaChat(){
+        if(chat != null)
+            chat.interrupt();
+    }
     /*
      @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
      account corrente
      @REQUIRE: il nome del progetto non deve avere spazi
      @REQUIRE: l'input non deve contenere il carattere speciale ?
+     @REQUIRE: i progetti possono essere al massimo 255
      */
     public void commandInterpreter(String cmd) throws IOException, NotBoundException {
         if (cmd == null) return;
@@ -221,6 +243,7 @@ public class TCPClient {
                         if (res.contains("Logout successful!")) {
                             logged = false;
                             server.unregister(stubCB, nick);
+                            fermaChat();
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -389,6 +412,35 @@ public class TCPClient {
                     System.out.println(toPrint);
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'cancelProject [projectName]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "readchat":
+                if(exec.length == 2){
+                    if(logged) {
+                        this.startConnection();
+                        String toPrint = readChat(exec[1]);
+                        if(toPrint.contains("yes"))
+                            avviaChat(toPrint.substring(3));
+                        else
+                            System.out.println(toPrint);
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "You can't read messages without login first!'" + Constants.ANSI_RESET);
+                    }
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'readChat [projectName]'" + Constants.ANSI_RESET);
+                }
+                break;
+            case "sendmsg":
+                if(exec.length == 2){
+                    String[] cmds = exec[1].split(" ",2);
+                    if(cmds.length == 2){
+                        this.startConnection();
+                        String toPrint = sendMessage(cmds[0], cmds[1]);
+                    }else{
+                        System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'sendMsg [projectName] [message]'" + Constants.ANSI_RESET);
+                    }
+                }else{
+                    System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'sendMsg [projectName] [message]'" + Constants.ANSI_RESET);
                 }
                 break;
             case "exit":
