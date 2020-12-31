@@ -72,7 +72,7 @@ public class DatabaseUsers {
     public synchronized String getListStatus(){
         String result = "";
         for(User u : userDb){
-            result += u.getNickName() + ": "+u.getStato() + "?";
+            result += u.getNickName() + ": "+u.getStato() + "£";
         }
         result = result.subSequence(0, result.length()-1).toString();
         return result;
@@ -82,7 +82,7 @@ public class DatabaseUsers {
         String result = "";
         for(User u : userDb){
             if(u.getStato().equals("online"))
-                result += u.getNickName() + ": "+u.getStato() + "?";
+                result += u.getNickName() + ": "+u.getStato() + "£";
         }
         result = result.subSequence(0, result.length()-1).toString();
         return result;
@@ -121,7 +121,7 @@ public class DatabaseUsers {
         CopyOnWriteArrayList<String> lista = getUtente(usr).getProjectList();
         String res = "";
         for(String s : lista){
-            res += s + "?";
+            res += s + "£";
         }
         if(res.length() >0)
             res = res.subSequence(0,res.length()-1).toString();
@@ -141,7 +141,7 @@ public class DatabaseUsers {
         lista = p.getUserList();
         String res = "";
         for(String s : lista){
-            res += s + "?";
+            res += s + "£";
         }
         if(res.length() >0)
                 res = res.subSequence(0, res.length()-1).toString();

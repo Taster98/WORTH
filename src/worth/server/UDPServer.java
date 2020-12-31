@@ -14,11 +14,4 @@ public class UDPServer {
         socket.send(packet);
         socket.close();
     }
-
-    public static void main(String[] args) throws IOException {
-        sendMessage("This is a multicast messge", "239.0.0.1", 4321);
-        sendMessage("This is the second multicast messge", "239.0.0.1", 4321);
-        sendMessage("This is the third multicast messge", "239.0.0.1", 4321);
-        sendMessage("OK", "239.0.0.1", 4321);
-    }
 }

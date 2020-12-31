@@ -588,10 +588,10 @@ public class ClientHandler implements Runnable{
             while(true) {
                 if(in != null) {
                     String rdln = in.readLine();
-                    if(rdln != null && !rdln.contains("?")) {
+                    if(rdln != null && !rdln.contains("£")) {
                         actionHandler(rdln);
                     }else if(rdln != null){
-                        System.out.println("Input must not contain special character '?'.");
+                        System.out.println("Input must not contain special character '£'.");
                     }
                 }
             }

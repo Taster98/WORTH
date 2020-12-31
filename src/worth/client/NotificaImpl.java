@@ -15,7 +15,7 @@ public class NotificaImpl extends RemoteObject implements NotificaClient {
     @Override
     public void notifyUsers(String lista) throws RemoteException {
         // Splitto la lista:
-        lista = lista.replace("?", "\n");
+        lista = lista.replace("£", "\n");
         //System.out.print(Constants.ANSI_GREEN + "Lista utenti aggiornata:\n"+lista + "\n>" + Constants.ANSI_RESET);
         //Non devo stamparla ma devo salvarla nel file userList
         try {

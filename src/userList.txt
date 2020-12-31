@@ -1,4 +1,4 @@
 luca: offline
 fulvio: offline
-mario: online
+mario: offline
 luiggi: online

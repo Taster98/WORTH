@@ -240,7 +240,7 @@ public class Project {
         //converto tutta la lista in un'unica gigantesca stringa
         String output = "";
         for(String s : result){
-            output += s + "?";
+            output += s + "£";
         }
         return output;
     }
@@ -262,7 +262,7 @@ public class Project {
             found = true;
         }
         if(found){
-            return "card name: "+c.getCardName()+"?card description: "+c.getCardDescription()+"?current list: "+c.getCurrentListName()+"?";
+            return "card name: "+c.getCardName()+"£card description: "+c.getCardDescription()+"£current list: "+c.getCurrentListName()+"£";
         }else{
             return null;
         }
@@ -350,7 +350,7 @@ public class Project {
         if(found){
             String res = "";
             for(String s : c.getHistory()){
-                res += s + "?";
+                res += s + "£";
             }
             return res;
         }else{

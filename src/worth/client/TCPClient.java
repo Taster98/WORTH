@@ -141,7 +141,7 @@ public class TCPClient {
      @REQUIRE: la registrazione va fatta prima di ogni cosa; se si prova a registrarsi quando si è loggati, si viene automaticamente sloggati dall
      account corrente
      @REQUIRE: il nome del progetto non deve avere spazi
-     @REQUIRE: l'input non deve contenere il carattere speciale ?
+     @REQUIRE: l'input non deve contenere il carattere speciale £
      @REQUIRE: i progetti possono essere al massimo 255
      */
     public void commandInterpreter(String cmd) throws IOException, NotBoundException {
@@ -258,7 +258,7 @@ public class TCPClient {
                         try {
                             //this.startConnection();
                             String toPrint = listUsers(null);
-                            //toPrint = Constants.ANSI_GREEN + "Lista utenti aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
+                            //toPrint = Constants.ANSI_GREEN + "Lista utenti aggiornata:\n" + toPrint.replace("£", "\n") + Constants.ANSI_RESET;
                             System.out.println(Constants.ANSI_GREEN + toPrint + Constants.ANSI_RESET);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -276,7 +276,7 @@ public class TCPClient {
                         try {
                             //this.startConnection();
                             String toPrint = listUsers("online");
-                            //toPrint = Constants.ANSI_GREEN + "Lista utenti online aggiornata:\n" + toPrint.replace("?", "\n") + Constants.ANSI_RESET;
+                            //toPrint = Constants.ANSI_GREEN + "Lista utenti online aggiornata:\n" + toPrint.replace("£", "\n") + Constants.ANSI_RESET;
                             System.out.println(Constants.ANSI_GREEN + toPrint + Constants.ANSI_RESET);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -310,7 +310,7 @@ public class TCPClient {
                 if(exec.length == 1){
                     this.startConnection();
                     String toPrint = listProjects();
-                    toPrint = Constants.ANSI_GREEN + "Your project list:\n" + toPrint.replace("?","\n")+Constants.ANSI_RESET;
+                    toPrint = Constants.ANSI_GREEN + "Your project list:\n" + toPrint.replace("£","\n")+Constants.ANSI_RESET;
                     System.out.println(toPrint);
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'listProjects'" + Constants.ANSI_RESET);
@@ -320,7 +320,7 @@ public class TCPClient {
                 if(exec.length == 2){
                     //this.startConnection();
                     String toPrint = showMembers(exec[1]);
-                    toPrint = Constants.ANSI_GREEN + "Members of "+exec[1]+" project:\n"+toPrint.replace("?","\n")+Constants.ANSI_RESET;
+                    toPrint = Constants.ANSI_GREEN + "Members of "+exec[1]+" project:\n"+toPrint.replace("£","\n")+Constants.ANSI_RESET;
                     System.out.println(toPrint);
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showMembers [projectName]'" + Constants.ANSI_RESET);
@@ -344,7 +344,7 @@ public class TCPClient {
                 if(exec.length == 2){
                     this.startConnection();
                     String toPrint = showCards(exec[1]);
-                    System.out.println(toPrint.replace("?","\n"));
+                    System.out.println(toPrint.replace("£","\n"));
                 }else{
                     System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showCards [projectName]'" + Constants.ANSI_RESET);
                 }
@@ -355,7 +355,7 @@ public class TCPClient {
                     if(cmds.length == 2){
                         this.startConnection();
                         String toPrint = showCard(cmds[0], cmds[1]);
-                        System.out.println(toPrint.replace("?","\n"));
+                        System.out.println(toPrint.replace("£","\n"));
                     }else{
                         System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'showCard [projectName] [cardName]'" + Constants.ANSI_RESET);
                     }
@@ -397,7 +397,7 @@ public class TCPClient {
                     if(cmds.length == 2){
                         this.startConnection();
                         String toPrint = getHistory(cmds[0],cmds[1]);
-                        System.out.println("History of "+cmds[1]+":\n"+toPrint.replace("?", "\n"));
+                        System.out.println("History of "+cmds[1]+":\n"+toPrint.replace("£", "\n"));
                     }else{
                         System.out.println(Constants.ANSI_RED + "Wrong usage. Type 'getHistory [projectName] [cardName]'" + Constants.ANSI_RESET);
                     }
@@ -468,8 +468,8 @@ public class TCPClient {
             else
                 inputText = broken[0].toLowerCase();
             try {
-                if(inputText.contains("?")){
-                    System.out.println("Input must not contain special character '?'.");
+                if(inputText.contains("£")){
+                    System.out.println("Input must not contain special character '£'.");
                 }else{
                     client.commandInterpreter(inputText);
                 }
