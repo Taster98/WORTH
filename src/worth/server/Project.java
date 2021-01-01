@@ -7,7 +7,6 @@ import worth.Constants;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /*
+Classe che rappresenta un'entità progetto, composto di:
 * nomeProgetto + todoList<Card>, progressList<Card>, tobeRevisedList<Card>, doneList<Card> + userList<User>
 * */
 public class Project {
@@ -25,30 +25,33 @@ public class Project {
     private CopyOnWriteArrayList<Card> tobeRevisedList;
     private CopyOnWriteArrayList<Card> doneList;
     private CopyOnWriteArrayList<String> userList;
-    //Aggiungo l'ip per il multicast
-    private InetAddress multicastIp;
+
     public Project(String projectName){
         this.projectName = projectName;
-        this.todoList = new CopyOnWriteArrayList<Card>();
-        this.progressList = new CopyOnWriteArrayList<Card>();
-        this.tobeRevisedList = new CopyOnWriteArrayList<Card>();
-        this.doneList = new CopyOnWriteArrayList<Card>();
-        this.userList = new CopyOnWriteArrayList<String>();
+        this.todoList = new CopyOnWriteArrayList<>();
+        this.progressList = new CopyOnWriteArrayList<>();
+        this.tobeRevisedList = new CopyOnWriteArrayList<>();
+        this.doneList = new CopyOnWriteArrayList<>();
+        this.userList = new CopyOnWriteArrayList<>();
+    }
+    //Metodo che aggiunge un utente al progetto
+    public synchronized void addUser(String usr){
+        this.userList.addIfAbsent(usr);
     }
 
-    public synchronized boolean addUser(String usr){
-        return this.userList.addIfAbsent(usr);
-    }
+    //metodo che restituisce la lista utenti di un progetto
     public synchronized CopyOnWriteArrayList<String> getUserList(){
         return this.userList;
     }
 
+    //metodo che aggiunge card alla lista todoList
     public synchronized boolean addTodoList(Card c) {
         if(todoList == null)
             this.todoList = new CopyOnWriteArrayList<>();
         return this.todoList.addIfAbsent(c);
     }
 
+    //Metodo che crea la directory relativa al progetto
     public synchronized String createDir(String projectName){
         try {
             Path path = Paths.get(Constants.progettiPath+projectName+"/");
@@ -59,8 +62,9 @@ public class Project {
         }
         return null;
     }
+
+    //Metodo che rimuove la directory relativa al progetto e il suo contenuto
     public synchronized boolean removeDir(File dir){
-        //File dir = new File(Constants.progettiPath+projectName+"/");
         File[] content = dir.listFiles();
         if (content != null) {
             for (File file : content) {
@@ -69,6 +73,8 @@ public class Project {
         }
         return dir.delete();
     }
+
+    //Metodo che genera la lista di file relativa alle liste di un progetto
     public synchronized boolean generateLists(String path){
         try{
             File todo = new File(path+"/todoList.json");
@@ -126,7 +132,7 @@ public class Project {
         }
     }
     //funzione che scrive nella todoList
-    public synchronized boolean writeTodoList(String path){
+    public synchronized void writeTodoList(String path){
         Writer writer;
         try {
             writer = new FileWriter(path+"/todoList.json");
@@ -134,10 +140,8 @@ public class Project {
             gson.toJson(todoList, writer);
             writer.flush();
             writer.close();
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
     //funzione che legge tutte le liste di cards
@@ -161,7 +165,7 @@ public class Project {
     }
 
     //funzione che scrive tutte le liste di cards
-    public synchronized boolean writeAllLists(String path){
+    public synchronized void writeAllLists(String path){
         Writer writer;
         try {
             writer = new FileWriter(path+"/todoList.json");
@@ -192,12 +196,12 @@ public class Project {
             }
             writer.flush();
             writer.close();
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
+
+    //Metodo che ritorna la lista di tutte le card
     public synchronized List<Card> getAllCards(){
         List<Card> result = new ArrayList<>();
         if(todoList != null)
@@ -210,11 +214,15 @@ public class Project {
             result.addAll(doneList);
         return result;
     }
+
+    //Metodo che ritorna la lista di card nella doneList
     public synchronized List<Card> getDoneCards(){
         if(this.doneList == null)
             this.doneList = new CopyOnWriteArrayList<>();
         return this.doneList;
     }
+
+    //Metodo che restituisce una stringa stampabile della lista di tutte le card.
     public synchronized String getCardList(){
         List<String> result = new ArrayList<>();
         if(todoList != null) {
@@ -245,6 +253,7 @@ public class Project {
         return output;
     }
 
+    //Metodo che restituisce tutte le informazioni di una specifica card.
     public synchronized String getCardInfo(String cardName){
         Card c = new Card(cardName);
         boolean found = false;
@@ -267,22 +276,24 @@ public class Project {
             return null;
         }
     }
+
+    //Metodo che sposta una card da una lista a un'altra
     public synchronized int moveCard(String cardName, String srcList, String destList){
         CopyOnWriteArrayList<Card> listSrc;
         CopyOnWriteArrayList<Card> listDest;
-        if(srcList.equals("todoList")){
+        if(srcList.equals("todo")){
             if(this.todoList == null)
                 this.todoList = new CopyOnWriteArrayList<>();
             listSrc = this.todoList;
-        }else if(srcList.equals("progressList")){
+        }else if(srcList.equals("progress")){
             if(this.progressList == null)
                 this.progressList = new CopyOnWriteArrayList<>();
             listSrc = this.progressList;
-        }else if(srcList.equals("revisedList")){
+        }else if(srcList.equals("revised")){
             if(this.tobeRevisedList == null)
                 this.tobeRevisedList = new CopyOnWriteArrayList<>();
             listSrc = this.tobeRevisedList;
-        }else if(srcList.equals("doneList")){
+        }else if(srcList.equals("done")){
             if(this.doneList == null)
                 this.doneList = new CopyOnWriteArrayList<>();
             listSrc = this.doneList;
@@ -290,19 +301,19 @@ public class Project {
             listSrc = null;
         }
 
-        if(destList.equals("todoList")){
+        if(destList.equals("todo")){
             if(this.todoList == null)
                 this.todoList = new CopyOnWriteArrayList<>();
             listDest = this.todoList;
-        }else if(destList.equals("progressList")){
+        }else if(destList.equals("progress")){
             if(this.progressList == null)
                 this.progressList = new CopyOnWriteArrayList<>();
             listDest = this.progressList;
-        }else if(destList.equals("revisedList")){
+        }else if(destList.equals("revised")){
             if(this.tobeRevisedList == null)
                 this.tobeRevisedList = new CopyOnWriteArrayList<>();
             listDest = this.tobeRevisedList;
-        }else if(destList.equals("doneList")){
+        }else if(destList.equals("done")){
             if(this.doneList == null)
                 this.doneList = new CopyOnWriteArrayList<>();
             listDest = this.doneList;
@@ -318,7 +329,6 @@ public class Project {
                     c = listSrc.get(listSrc.indexOf(c));
                     c.setCurrentListName(destList);
                     listDest.addIfAbsent(c);
-                    //writeAllLists(Constants.progettiPath+projectName);
                     listSrc.remove(c);
                     writeAllLists(Constants.progettiPath+projectName);
                 }else{
@@ -331,6 +341,7 @@ public class Project {
         }
     }
 
+    //Metodo che ritorna la history di una card, sottoforma di stringa
     public synchronized String getCardHistory(String cardName){
         Card c = new Card(cardName);
         boolean found = false;
@@ -358,6 +369,7 @@ public class Project {
         }
     }
 
+    //Metodo che controlla l'esistenza di una card
     public synchronized boolean doCardAlreadyExist(String cardName){
         Card c = new Card(cardName);
         List<Card> aux;

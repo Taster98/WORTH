@@ -1,4 +1,0 @@
-luca: offline
-fulvio: offline
-mario: offline
-luiggi: online

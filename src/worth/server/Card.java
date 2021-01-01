@@ -3,12 +3,17 @@ package worth.server;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+//Questo oggetto identifica una card di un progetto.
 public class Card {
     private String cardName;
     private String cardDescription;
     private String currentListName;
+
+    //La history è stata pensata come una lista contenente tutte le liste attraverso la quale la card è passata, ad
+    //eccezione di quella corrente, contenuta nella variabile d'istanza 'currentListName'.
     private CopyOnWriteArrayList<String> history;
 
+    //Quando una card viene creata, viene inserita nella todoList.
     public Card(String cardName){
         this.cardName = cardName;
         this.currentListName = "todoList";
@@ -16,6 +21,8 @@ public class Card {
         //Il primo evento di ogni card è sempre todoList
         history.addIfAbsent("todoList");
     }
+
+    //I metodi hanno la clausola "synchronized" poiché la struttura dati può essere acceduta concorrentemente da più thread.
 
     public synchronized void setCardDescription(String desc){
         this.cardDescription = desc;
@@ -26,7 +33,6 @@ public class Card {
             history.add(this.currentListName);
         }
         this.currentListName = currentListName;
-        //history.add(this.currentListName);
     }
 
     public synchronized String getCardName() {

@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+//Questa classe rappresenta il server UDP, che in realtà contiene semplicemente un metodo statico per l'invio di messaggi.
 public class UDPServer {
     public static void sendMessage(String message, String ipAddress, int port) throws IOException {
         DatagramSocket socket = new DatagramSocket();

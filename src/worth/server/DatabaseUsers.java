@@ -9,6 +9,9 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/* Questa classe è utilizzata per la gestione del database utenti, garantisce la thread-safeness tramite strutture dati
+concorrenti e accessi in mutua esclusione ad esse e al file dbUsers.json.
+ */
 public class DatabaseUsers {
     CopyOnWriteArrayList<User> userDb;
     public DatabaseUsers() {
@@ -34,7 +37,7 @@ public class DatabaseUsers {
         return userDb.addIfAbsent(usr);
     }
     // metodo che scrive sul file le modifiche al database degli utenti
-    public synchronized int writeDb() {
+    public synchronized void writeDb() {
         Writer writer;
         try {
             writer = new FileWriter(Constants.dbPath);
@@ -42,33 +45,38 @@ public class DatabaseUsers {
             gson.toJson(userDb, writer);
             writer.flush();
             writer.close();
-            return 1;
         } catch (IOException e) {
             e.printStackTrace();
-            return 0;
         }
     }
 
+    //metodo che cerca un utente nella struttura dati
     public synchronized boolean cercaUtente(User usr){
         if(this.userDb != null)
             return this.userDb.contains(usr);
         else return false;
     }
 
+    //metodo osservatore che preleva l'utente dalla struttura dati
     public synchronized User getUtente(User usr){
         if(this.userDb != null){
             return userDb.get(userDb.indexOf(usr));
         }
         return null;
     }
+
+    //Metodo che cambia lo stato dell'utente
     public synchronized void setStatus(User usr, String status){
         userDb.get(userDb.indexOf(usr)).setStato(status);
         writeDb();
     }
+
+    //Metodo osservatore che ritorna la struttura dati contenente la lista utenti
     public synchronized CopyOnWriteArrayList<User> getUserDb() {
         return userDb;
     }
 
+    //Metodo che ritorna una stringa contenente tutti gli utenti e i loro stati.
     public synchronized String getListStatus(){
         String result = "";
         for(User u : userDb){
@@ -78,16 +86,7 @@ public class DatabaseUsers {
         return result;
     }
 
-    public synchronized String getOnlineListStatus(){
-        String result = "";
-        for(User u : userDb){
-            if(u.getStato().equals("online"))
-                result += u.getNickName() + ": "+u.getStato() + "£";
-        }
-        result = result.subSequence(0, result.length()-1).toString();
-        return result;
-    }
-
+    //metodo che aggiunge un progetto a un utente
     public synchronized boolean addProject(User usr, String projectName){
         User aux = userDb.get(userDb.indexOf(usr));
         if(aux.getProjectList() == null){
@@ -101,7 +100,8 @@ public class DatabaseUsers {
         return res;
     }
 
-    public synchronized boolean removeProject(User usr, String projName){
+    //metodo che rimuove un progetto da un utente
+    public synchronized void removeProject(User usr, String projName){
         User aux = userDb.get(userDb.indexOf(usr));
         if(aux.getProjectList() == null){
             aux.setProjectList(new CopyOnWriteArrayList<>());
@@ -115,8 +115,9 @@ public class DatabaseUsers {
         userDb.remove(aux);
         userDb.addIfAbsent(aux);
         writeDb();
-        return res;
     }
+
+    //metodo che restituisce una stringa con la lista dei progetti dell'utente
     public synchronized String getUserProjectList(User usr){
         CopyOnWriteArrayList<String> lista = getUtente(usr).getProjectList();
         String res = "";
@@ -128,11 +129,13 @@ public class DatabaseUsers {
         return res;
     }
 
+    //metodo che controlla la presenza di un progetto nella lista progetti dell'utente
     public synchronized boolean isMember(String projName, User usr){
         CopyOnWriteArrayList<String> lista = getUtente(usr).getProjectList();
         return lista.contains(projName);
     }
 
+    //metodo che ritorna la lista di membri di un progetto
     public synchronized String getMemberList(String projName){
         CopyOnWriteArrayList<String> lista;
         String fullPath = Constants.progettiPath + projName;
@@ -147,6 +150,8 @@ public class DatabaseUsers {
                 res = res.subSequence(0, res.length()-1).toString();
         return res;
     }
+
+    //metodo che aggiunge un utente alla lista utenti di un progetto
     public synchronized boolean addMemberToList(String projName, User usr){
         CopyOnWriteArrayList<String> list;
         String fullPath = Constants.progettiPath + projName;
@@ -154,13 +159,9 @@ public class DatabaseUsers {
         p.readUserList(fullPath);
         list = p.getUserList();
         boolean res;
-        if(list.addIfAbsent(usr.getNickName())){
-            res = true;
-        }else{
-            res = false;
-        }
+        res = list.addIfAbsent(usr.getNickName());
         p.writeUserList(fullPath);
-        // Devo ora scriverlo anche nel file classico, nella lista
+        // Devo ora scriverlo anche nel file classico, nella lista progetti globale
         readDb();
         addProject(usr, projName);
         return res;

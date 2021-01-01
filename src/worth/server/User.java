@@ -3,10 +3,11 @@ package worth.server;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+//Questa classe rappresenta l'entità Utente.
 public class User {
     private String nickName;
     private String password;
-    // offline o online, serve per poi restituire la lista di online/offline
+    // offline o online
     private String stato;
     // lista progetti di cui l'utente è membro
     private CopyOnWriteArrayList<String> projectList;
@@ -14,6 +15,7 @@ public class User {
     public User(){
         this.nickName = "";
         this.password = "";
+        //Inizialmente offline
         this.stato = "offline";
         this.projectList = new CopyOnWriteArrayList<>();
     }

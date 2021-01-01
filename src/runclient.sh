@@ -1,2 +1,2 @@
 #!/bin/bash
-java worth.client.TCPClient
+java worth.client.ClientMain

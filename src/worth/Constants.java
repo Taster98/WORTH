@@ -3,14 +3,11 @@ package worth;
 public final class Constants {
     /*Colori CLI*/
     public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
 
     //Percorso database utenti registrati
     public static final String dbPath = "worth/server/Database/userDb.json";
@@ -20,6 +17,8 @@ public final class Constants {
     public static final String fileProgettiPath = progettiPath+"listaProgetti.json";
     //Percorso del file degli indirizzi ip
     public static final String ipAddressPath = progettiPath+"listaIpAddress.json";
+    //Percorso lista utenti da aggiornare client
+    public static final String userListPath = "worth/client/userList.txt";
 
     //Porta del server TCP
     public static final int TCP_PORT = 6666;
@@ -27,7 +26,8 @@ public final class Constants {
     public static final String LOCALHOST_IP = "127.0.0.1";
     //Base per l'indirizzo multicast LOCALE
     public static final String CHAT_IP_BASE = "239.0.0.1";
-    public static final int port = 4321;
+    public static final int UDP_PORT = 4321;
+
     //Testo del comando di help
     public static final String HELP = "Welcome to WORTH.\n" +
             "Here is the complete command list: \u001B[34m NOTICE: COMMANDS ARE NOT CASE SENSITIVE \u001B[0m \n\n" +
@@ -43,7 +43,7 @@ public final class Constants {
             "\u001B[35m showCards [projectName] \u001B[0m -> list all cards of [projectName] project\n" +
             "\u001B[35m showCard [projectName] [cardName] \u001B[0m -> show informations about [cardName] card in [projectName] project\n" +
             "\u001B[35m addCard [projectName] [cardName] [description] \u001B[0m -> add [cardName] to [projectName] with [description]\n" +
-            "\u001B[35m moveCard [projectName] [cardName] {todoList, progressList, revisedList, doneList} {todoList, progressList, revisedList, doneList} \u001B[0m -> moves [cardName] of [projectName] project from [srcList] to [destList].\n" + //TODO
+            "\u001B[35m moveCard [projectName] [cardName] {todo, progress, revised, done} {todo, progress, revised, done} \u001B[0m -> moves [cardName] of [projectName] project from [srcList] to [destList].\n" + //TODO
             "\u001B[35m getHistory [projectName] [cardName] \u001B[0m -> show the history of [cardName] card in [projectName] project.\n" +
             "\u001B[35m readChat [projectName] \u001B[0m -> show the chat of the project [projectName].\n" +
             "\u001B[35m sendMsg [projectName] [message] \u001B[0m -> Send [message] to [projectName] project chat.\n" +

@@ -2,19 +2,21 @@ package worth.server;
 
 import worth.Constants;
 import worth.RegistrationInterface;
+
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.NoSuchAlgorithmException;
 
-public class RegistrationServer implements RegistrationInterface {
+/*Questa è la classe che rappresenta il server principale, che si occupa di registrare la RMI per la registrazione di un utente
+e l'avvio di un'istanza di server TCP.
+ */
+public class ServerMain implements RegistrationInterface {
     DatabaseUsers userDb;
-
-    public RegistrationServer() {
+    public ServerMain() {
         userDb = new DatabaseUsers();
-        // la lettura non è atomica, va fatta in mutua esclusione
-        //userDb.readDb();
     }
 
     // Ritorna 7 se la registrazione è andata a buon fine
@@ -38,7 +40,6 @@ public class RegistrationServer implements RegistrationInterface {
             andata = userDb.addUser(user);
             // la scrittura non è atomica, va fatta in mutua esclusione
             userDb.writeDb();
-            //userDb.readDb();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -46,10 +47,9 @@ public class RegistrationServer implements RegistrationInterface {
         else return 0;
     }
 
-
     public static void main(String[] args) {
         try {
-            RegistrationServer srv = new RegistrationServer();
+            ServerMain srv = new ServerMain();
             // Creo lo stub per la registrazione:
             RegistrationInterface stub = (RegistrationInterface) UnicastRemoteObject.exportObject(srv, 0);
 
@@ -70,11 +70,30 @@ public class RegistrationServer implements RegistrationInterface {
 
             // Avvio server TCP, passandogli il callback server
             TCPServer server = new TCPServer(serverCB);
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    try {
+                        Thread.sleep(200);
+                        //chiudo la connessione
+                        server.shutdown = true;
+                        try {
+                            server.stop();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        //Ultima print
+                        System.out.println("\nServer stopped.");
+
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        e.printStackTrace();
+                    }
+                }
+            });
             server.start();
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
         }
-
     }
 }

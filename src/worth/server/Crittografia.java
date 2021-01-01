@@ -5,6 +5,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/*
+Questa classe contiene un metodo statico per cifrare la password che un utente utilizza, al momento della registrazione
+tramite una funzione di hashing che utilizza l'algoritmo SHA-256. Anche durante il login vengono quindi confrontati
+gli hash delle password e non le password in chiaro; in questo modo, un'eventuale intrusione nel 'database' da parte di terzi
+impedisce comunque il furto delle password degli utenti.
+*/
 public class Crittografia {
     public static String hashMe(String pwd)throws NoSuchAlgorithmException{
         // Genero l'hash SHA-256 della stringa pwd, di modo da non salvarla in chiaro

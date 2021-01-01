@@ -7,22 +7,19 @@ import worth.Constants;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.net.InetAddress;
 import java.net.Socket;;
 import java.security.NoSuchAlgorithmException;
-import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ClientHandler implements Runnable{
     private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
-    private Scanner sc;
     // riferimento al database
     private DatabaseUsers userDb;
     // riferimento alla lista progetti
     private CopyOnWriteArrayList<String> projects;
-    // lista di ip
+    // riferimento alla lista di ip
     private CopyOnWriteArrayList<String> ipAddresses;
     // variabile di controllo per far sì che un client si connetta solo con un user alla volta
     private boolean logged;
@@ -33,7 +30,6 @@ public class ClientHandler implements Runnable{
     public ClientHandler(Socket socket, ServerNotImpl serverCB){
         this.logged = false;
         this.clientSocket = socket;
-        sc = new Scanner(System.in);
         this.userDb = new DatabaseUsers();
         userDb.readDb();
         utente = new User();
@@ -55,7 +51,7 @@ public class ClientHandler implements Runnable{
         }
     }
     //funzione che legge dal file la lista dei progetti
-    public synchronized int writeProjects() {
+    public synchronized void writeProjects() {
         Writer writer;
         try {
             writer = new FileWriter(Constants.fileProgettiPath);
@@ -63,14 +59,12 @@ public class ClientHandler implements Runnable{
             gson.toJson(projects, writer);
             writer.flush();
             writer.close();
-            return 1;
         } catch (IOException e) {
             e.printStackTrace();
-            return 0;
         }
     }
 
-    //funzione che legge gli indirizzi ip
+    //funzione che legge gli indirizzi ip dal file
     private synchronized void readIp(){
         Gson gson = new Gson();
         BufferedReader br;
@@ -83,8 +77,8 @@ public class ClientHandler implements Runnable{
             e.printStackTrace();
         }
     }
-    //funzione che scrive gli indirizzi ip
-    public synchronized int writeIp(){
+    //funzione che scrive gli indirizzi ip nel file
+    public synchronized void writeIp(){
         Writer writer;
         try {
             writer = new FileWriter(Constants.ipAddressPath);
@@ -92,47 +86,48 @@ public class ClientHandler implements Runnable{
             gson.toJson(ipAddresses, writer);
             writer.flush();
             writer.close();
-            return 1;
         } catch (IOException e) {
             e.printStackTrace();
-            return 0;
         }
     }
-    //funzione che aggiunge un progetto e anche l'ip relativo ad esso in lista
-    public synchronized boolean addIp(String ip) {
+    //funzione che aggiunge l'ip relativo in lista
+    public synchronized void addIp(String ip) {
         if(ipAddresses == null)
             ipAddresses = new CopyOnWriteArrayList<>();
-        return ipAddresses.addIfAbsent(ip);
+        ipAddresses.addIfAbsent(ip);
     }
 
-    //funzione che aggiunge un progetto e anche l'ip relativo ad esso in lista
+    //funzione che aggiunge un progetto in lista
     public synchronized boolean addProject(String prj) {
         if(projects == null)
             projects = new CopyOnWriteArrayList<>();
         return projects.addIfAbsent(prj);
     }
     //funzione che rimuove un progetto
-    public synchronized boolean removeProject(String prj) {
+    public synchronized void removeProject(String prj) {
         if(projects == null)
             projects = new CopyOnWriteArrayList<>();
-        return projects.remove(prj);
+        projects.remove(prj);
     }
+
+    //Metodo ausiliario che gestisce le azioni da fare a seconda del comando ricevuto
     private void actionHandler(String action){
         // Qui posso avere diverse azioni da voler fare;
         if(action == null) {
             return; //se l'azione è vuota esco
         }
         if(action.equals("")) throw new IllegalArgumentException();
+
         // Ora che sono certo che la stringa non sia vuota:
         String[] data = action.split(" ", 2); // in data[0] ho il comando
         try {
             switch (data[0]) {
                 case "login":
-                    // Il comando deve avere 2 argomenti: se ne ha uno solo, o solo due, stampo wrong usage
+                    // Il comando deve avere 2 argomenti: se ne ha uno solo, stampo wrong usage
                     if(data.length == 2) {
                         // Se c'è già un utente loggato non devo fare nulla
                         if (!logged) {
-                            userDb.readDb(); //<-- FIXARE QUESTO
+                            userDb.readDb();
                             String[] info = data[1].split(" ", 2); //in info[0] ho il nickname, in info[1] ho la psw
                             String psw = Crittografia.hashMe(info[1]);
                             // Creo l'utente
@@ -149,9 +144,8 @@ public class ClientHandler implements Runnable{
                                     // Se è già online non può accedere.
                                     if (found.getStato().equals("online")) {
                                         out.println(Constants.ANSI_RED + "User is already connected!" + Constants.ANSI_RESET);
-                                        return;
                                     } else {
-                                        // SONO QUI E HO FATTO BENE
+                                        // Se sono qui sono loggato correttamente
                                         out.println(Constants.ANSI_GREEN + "Login success! Welcome back " + utente.getNickName() + Constants.ANSI_RESET);
                                         // Devo aggiornare il database
                                         userDb.setStatus(utente, "online");
@@ -164,21 +158,18 @@ public class ClientHandler implements Runnable{
                                 } else {
                                     // PASSWORD ERRATA
                                     out.println(Constants.ANSI_RED + "Password is wrong!" + Constants.ANSI_RESET);
-                                    break;
                                 }
                             } else {
                                 // UTENTE NON ESISTE
                                 out.println(Constants.ANSI_RED + "This username doesn't exist!" + Constants.ANSI_RESET);
-                                return;
                             }
                         } else {
                             // SONO GIÀ COLLEGATO CON UN ACCOUNT
                             out.println(Constants.ANSI_RED + "You must logout from current account in order to login with another one!" + Constants.ANSI_RESET);
-                            return;
                         }
                     }else{
+                        // WRONG USAGE
                         out.println(Constants.ANSI_RED + "Wrong usage: try with login [nickname] [password]"+ Constants.ANSI_RESET);
-                        return;
                     }
                     break;
                 case "logout":
@@ -200,21 +191,18 @@ public class ClientHandler implements Runnable{
                                 }else{
                                     // NICKNAME NON GIUSTO!
                                     out.println(Constants.ANSI_RED + "Invalid nickname!" + Constants.ANSI_RESET);
-                                    return;
                                 }
                             }else{
                                 // NICKNAME NON GIUSTO!
                                 out.println(Constants.ANSI_RED + "Invalid nickname!" + Constants.ANSI_RESET);
-                                return;
                             }
                         } else {
                             // NON SONO LOGGATO!
                             out.println(Constants.ANSI_RED + "You can't logout without login first!" + Constants.ANSI_RESET);
-                            return;
                         }
                     }else{
+                        // WRONG USAGE
                         out.println(Constants.ANSI_RED + "Wrong usage: try with logout [nickname]"+ Constants.ANSI_RESET);
-                        return;
                     }
                     break;
                 case "createProject":
@@ -313,7 +301,7 @@ public class ClientHandler implements Runnable{
                                         out.println(Constants.ANSI_GREEN + usr.getNickName() + " added successfully!" + Constants.ANSI_RESET);
                                         readProjects();
                                         readIp();
-                                        UDPServer.sendMessage(utente.getNickName()+" added "+usr.getNickName()+" to "+cmds[0],ipAddresses.get(projects.indexOf(cmds[0])),Constants.port);
+                                        UDPServer.sendMessage(utente.getNickName()+" added "+usr.getNickName()+" to "+cmds[0],ipAddresses.get(projects.indexOf(cmds[0])),Constants.UDP_PORT);
                                     } else {
                                         // ALREADY IN
                                         out.println(Constants.ANSI_RED + "The user is already inside this project!" + Constants.ANSI_RESET);
@@ -323,6 +311,7 @@ public class ClientHandler implements Runnable{
                                     out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
                                 }
                             }else{
+                                // WRONG USAGE
                                 out.println(Constants.ANSI_RED + "Invalid command!" + Constants.ANSI_RESET);
                             }
                         }else{
@@ -399,7 +388,7 @@ public class ClientHandler implements Runnable{
                                             readProjects();
                                             readIp();
                                             out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " added successfully!" + Constants.ANSI_RESET);
-                                            UDPServer.sendMessage(utente.getNickName()+" added a new card "+cmds[1]+" to "+cmds[0],ipAddresses.get(projects.indexOf(cmds[0])),Constants.port);
+                                            UDPServer.sendMessage(utente.getNickName()+" added a new card "+cmds[1]+" to "+cmds[0],ipAddresses.get(projects.indexOf(cmds[0])),Constants.UDP_PORT);
                                         }else{
                                             // ESISTE GIÀ
                                             out.println(Constants.ANSI_RED + "The card already exist! Choose another name." + Constants.ANSI_RESET);
@@ -433,13 +422,12 @@ public class ClientHandler implements Runnable{
                                     p.readAllLists(Constants.progettiPath+cmds[0]);
                                     int res;
                                     if((res = p.moveCard(cmds[1],cmds[2],cmds[3])) == 7){
-                                        //p.readAllLists(Constants.progettiPath+cmds[0]);
                                         //Se sono qui sono riuscito, scrivo tutto
-                                        //Stampo risultato
+                                        //Stampo risultato e invio il messaggio con il server UDP
                                         readProjects();
                                         readIp();
                                         out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " moved successfully!" + Constants.ANSI_RESET);
-                                        UDPServer.sendMessage(utente.getNickName()+" moved card "+cmds[1]+" from "+cmds[2]+" to "+cmds[3],ipAddresses.get(projects.indexOf(cmds[0])),Constants.port);
+                                        UDPServer.sendMessage(utente.getNickName()+" moved card "+cmds[1]+" from "+cmds[2]+" to "+cmds[3]+" in project "+cmds[0],ipAddresses.get(projects.indexOf(cmds[0])),Constants.UDP_PORT);
                                     }else{
                                         if(res == -1){
                                             out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists! Error "+res + Constants.ANSI_RESET);
@@ -520,7 +508,7 @@ public class ClientHandler implements Runnable{
                                     //qui sono loggato, appartengo al progetto e posso finalmente inviare il messaggio
                                     readProjects();
                                     readIp();
-                                    UDPServer.sendMessage(Constants.ANSI_YELLOW+utente.getNickName()+" sent: "+cmds[1]+Constants.ANSI_RESET,ipAddresses.get(projects.indexOf(cmds[0])),Constants.port);
+                                    UDPServer.sendMessage(Constants.ANSI_YELLOW+utente.getNickName()+" sent: "+cmds[1]+Constants.ANSI_RESET,ipAddresses.get(projects.indexOf(cmds[0])),Constants.UDP_PORT);
                                     out.println("");
                                 }else{
                                     // NON AMMESSO!
