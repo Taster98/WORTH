@@ -3,7 +3,9 @@ package worth.server;
 import worth.Constants;
 import worth.RegistrationInterface;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -21,7 +23,7 @@ public class ServerMain implements RegistrationInterface {
 
     // Ritorna 7 se la registrazione è andata a buon fine
     @Override
-    public int register(String nickUtente, String password) throws RemoteException {
+    public synchronized int register(String nickUtente, String password) throws RemoteException {
         boolean andata = false;
         // Nickname e password non devono essere nè null nè vuoti
         if (nickUtente == null || password == null) throw new NullPointerException();
@@ -74,6 +76,11 @@ public class ServerMain implements RegistrationInterface {
                 public void run() {
                     try {
                         Thread.sleep(200);
+                        //Pulisco file degli ip
+                        PrintWriter pw = new PrintWriter(Constants.ipAddressPath);
+                        pw.print("");
+                        pw.flush();
+                        pw.close();
                         //chiudo la connessione
                         server.shutdown = true;
                         try {
@@ -84,7 +91,7 @@ public class ServerMain implements RegistrationInterface {
                         //Ultima print
                         System.out.println("\nServer stopped.");
 
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException | FileNotFoundException e) {
                         Thread.currentThread().interrupt();
                         e.printStackTrace();
                     }

@@ -22,7 +22,7 @@ public class ServerNotificaImpl extends RemoteObject implements NotificaServer {
     //Utente e client in questa classe sono visti come "entità unica", questo per permettere il riconoscimento e la
     //deregistrazione di uno stesso client, al momento del logout.
     @Override
-    public void register(NotificaClient client, String nick) throws RemoteException {
+    public synchronized void register(NotificaClient client, String nick) throws RemoteException {
         if(!userList.contains(nick)){
             userList.add(nick);
             clientList.add(client);
@@ -31,7 +31,7 @@ public class ServerNotificaImpl extends RemoteObject implements NotificaServer {
     }
 
     @Override
-    public void unregister(NotificaClient client, String nick) throws RemoteException {
+    public synchronized void unregister(NotificaClient client, String nick) throws RemoteException {
         if(userList.contains(nick)){
             int i = userList.indexOf(nick);
             userList.remove(nick);
@@ -46,7 +46,7 @@ public class ServerNotificaImpl extends RemoteObject implements NotificaServer {
         compute(usrs);
     }
 
-    private void compute(String usrs) throws RemoteException{
+    private synchronized void compute(String usrs) throws RemoteException{
         for(NotificaClient c : clientList){
             c.notifyUsers(usrs);
         }
