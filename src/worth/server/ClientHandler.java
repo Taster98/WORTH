@@ -146,13 +146,13 @@ public class ClientHandler implements Runnable{
                                         out.println(Constants.ANSI_RED + "User is already connected!" + Constants.ANSI_RESET);
                                     } else {
                                         // Se sono qui sono loggato correttamente
-                                        out.println(Constants.ANSI_GREEN + "Login success! Welcome back " + utente.getNickName() + Constants.ANSI_RESET);
                                         // Devo aggiornare il database
                                         userDb.setStatus(utente, "online");
                                         userDb.writeDb();
                                         serverCB.update(userDb.getListStatus());
                                         // Setto il flag logged
                                         logged = true;
+                                        out.println(Constants.ANSI_GREEN + "Login success! Welcome back " + utente.getNickName() + Constants.ANSI_RESET);
                                     }
 
                                 } else {
@@ -171,6 +171,10 @@ public class ClientHandler implements Runnable{
                         // WRONG USAGE
                         out.println(Constants.ANSI_RED + "Wrong usage: try with login [nickname] [password]"+ Constants.ANSI_RESET);
                     }
+                    break;
+                case "update":
+                    userDb.readDb();
+                    serverCB.update(userDb.getListStatus());
                     break;
                 case "logout":
                     if(data.length == 2) {

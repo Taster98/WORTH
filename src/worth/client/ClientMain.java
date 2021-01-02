@@ -82,7 +82,9 @@ public class ClientMain {
         sc.close();
         return output;
     }
-
+    private void updateUsers() throws IOException{
+        out.println("update");
+    }
     //Metodo per l'invio al server dei dati della creazione del progetto
     private String createProject(String projectName) throws IOException {
         out.println("createProject " + projectName);
@@ -254,6 +256,7 @@ public class ClientMain {
                             if (res.contains("Login success!")) {
                                 logged = true;
                                 server.register(stubCB, data[0]); // mi registro alla callback
+                                updateUsers();
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
