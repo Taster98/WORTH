@@ -59,7 +59,7 @@ public class ServerMain implements RegistrationInterface {
             registry.rebind("RegistrationInterface", stub);
 
             // Gestione callback notifiche
-            ServerNotImpl serverCB = new ServerNotImpl();
+            ServerNotificaImpl serverCB = new ServerNotificaImpl();
             NotificaServer stubCB = (NotificaServer) UnicastRemoteObject.exportObject(serverCB, 39000);
             String name = "Server";
             LocateRegistry.createRegistry(5000);

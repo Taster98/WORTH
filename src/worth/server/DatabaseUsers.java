@@ -51,14 +51,14 @@ public class DatabaseUsers {
     }
 
     //metodo che cerca un utente nella struttura dati
-    public synchronized boolean cercaUtente(User usr){
+    public boolean cercaUtente(User usr){
         if(this.userDb != null)
             return this.userDb.contains(usr);
         else return false;
     }
 
     //metodo osservatore che preleva l'utente dalla struttura dati
-    public synchronized User getUtente(User usr){
+    public User getUtente(User usr){
         if(this.userDb != null){
             return userDb.get(userDb.indexOf(usr));
         }
@@ -72,12 +72,12 @@ public class DatabaseUsers {
     }
 
     //Metodo osservatore che ritorna la struttura dati contenente la lista utenti
-    public synchronized CopyOnWriteArrayList<User> getUserDb() {
+    public CopyOnWriteArrayList<User> getUserDb() {
         return userDb;
     }
 
     //Metodo che ritorna una stringa contenente tutti gli utenti e i loro stati.
-    public synchronized String getListStatus(){
+    public String getListStatus(){
         String result = "";
         for(User u : userDb){
             result += u.getNickName() + ": "+u.getStato() + "£";
@@ -106,7 +106,7 @@ public class DatabaseUsers {
         if(aux.getProjectList() == null){
             aux.setProjectList(new CopyOnWriteArrayList<>());
         }
-        boolean res = aux.getProjectList().remove(projName);
+        aux.getProjectList().remove(projName);
         //Cancello il progetto da tutti i membri e non solo da chi chiama la remove:
         for(User u : userDb){
             u.getProjectList().remove(projName);
@@ -118,7 +118,7 @@ public class DatabaseUsers {
     }
 
     //metodo che restituisce una stringa con la lista dei progetti dell'utente
-    public synchronized String getUserProjectList(User usr){
+    public String getUserProjectList(User usr){
         CopyOnWriteArrayList<String> lista = getUtente(usr).getProjectList();
         String res = "";
         for(String s : lista){
@@ -130,13 +130,13 @@ public class DatabaseUsers {
     }
 
     //metodo che controlla la presenza di un progetto nella lista progetti dell'utente
-    public synchronized boolean isMember(String projName, User usr){
+    public boolean isMember(String projName, User usr){
         CopyOnWriteArrayList<String> lista = getUtente(usr).getProjectList();
         return lista.contains(projName);
     }
 
     //metodo che ritorna la lista di membri di un progetto
-    public synchronized String getMemberList(String projName){
+    public String getMemberList(String projName){
         CopyOnWriteArrayList<String> lista;
         String fullPath = Constants.progettiPath + projName;
         Project p = new Project(projName);

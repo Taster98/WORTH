@@ -35,19 +35,19 @@ public class Card {
         this.currentListName = currentListName;
     }
 
-    public synchronized String getCardName() {
+    public String getCardName() {
         return cardName;
     }
 
-    public synchronized String getCardDescription() {
+    public String getCardDescription() {
         return cardDescription;
     }
 
-    public synchronized String getCurrentListName() {
+    public String getCurrentListName() {
         return currentListName;
     }
 
-    public synchronized CopyOnWriteArrayList<String> getHistory() {
+    public CopyOnWriteArrayList<String> getHistory() {
         return history;
     }
 

@@ -26,8 +26,8 @@ public class ClientHandler implements Runnable{
     // utente collegato a questo thread
     private User utente;
     // server per il callback
-    private ServerNotImpl serverCB;
-    public ClientHandler(Socket socket, ServerNotImpl serverCB){
+    private ServerNotificaImpl serverCB;
+    public ClientHandler(Socket socket, ServerNotificaImpl serverCB){
         this.logged = false;
         this.clientSocket = socket;
         this.userDb = new DatabaseUsers();

@@ -6,9 +6,9 @@ import java.net.ServerSocket;
 //Classe che rappresenta il server TCP.
 public class TCPServer {
     private ServerSocket serverSocket;
-    private ServerNotImpl serverCB;
+    private ServerNotificaImpl serverCB;
     public boolean shutdown;
-    public TCPServer(ServerNotImpl serverCB){
+    public TCPServer(ServerNotificaImpl serverCB){
         this.serverCB = serverCB;
         this.shutdown = false;
     }

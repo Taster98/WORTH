@@ -40,7 +40,7 @@ public class Project {
     }
 
     //metodo che restituisce la lista utenti di un progetto
-    public synchronized CopyOnWriteArrayList<String> getUserList(){
+    public CopyOnWriteArrayList<String> getUserList(){
         return this.userList;
     }
 
@@ -202,7 +202,7 @@ public class Project {
     }
 
     //Metodo che ritorna la lista di tutte le card
-    public synchronized List<Card> getAllCards(){
+    public List<Card> getAllCards(){
         List<Card> result = new ArrayList<>();
         if(todoList != null)
             result.addAll(todoList);
@@ -216,14 +216,14 @@ public class Project {
     }
 
     //Metodo che ritorna la lista di card nella doneList
-    public synchronized List<Card> getDoneCards(){
+    public List<Card> getDoneCards(){
         if(this.doneList == null)
             this.doneList = new CopyOnWriteArrayList<>();
         return this.doneList;
     }
 
     //Metodo che restituisce una stringa stampabile della lista di tutte le card.
-    public synchronized String getCardList(){
+    public String getCardList(){
         List<String> result = new ArrayList<>();
         if(todoList != null) {
             for (Card c : todoList) {
@@ -254,7 +254,7 @@ public class Project {
     }
 
     //Metodo che restituisce tutte le informazioni di una specifica card.
-    public synchronized String getCardInfo(String cardName){
+    public String getCardInfo(String cardName){
         Card c = new Card(cardName);
         boolean found = false;
         if(todoList != null && todoList.contains(c)){
@@ -342,7 +342,7 @@ public class Project {
     }
 
     //Metodo che ritorna la history di una card, sottoforma di stringa
-    public synchronized String getCardHistory(String cardName){
+    public String getCardHistory(String cardName){
         Card c = new Card(cardName);
         boolean found = false;
         if(todoList != null && todoList.contains(c)){
@@ -370,7 +370,7 @@ public class Project {
     }
 
     //Metodo che controlla l'esistenza di una card
-    public synchronized boolean doCardAlreadyExist(String cardName){
+    public boolean doCardAlreadyExist(String cardName){
         Card c = new Card(cardName);
         List<Card> aux;
         if((aux = getAllCards()) != null){

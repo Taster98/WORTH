@@ -25,7 +25,7 @@ public final class Constants {
     //Indirizzo del server TCP (in questo caso è l'indirizzo locale)
     public static final String LOCALHOST_IP = "127.0.0.1";
     //Base per l'indirizzo multicast LOCALE
-    public static final String CHAT_IP_BASE = "239.0.0.1";
+    public static final String CHAT_IP_BASE = "239.0.0.0";
     public static final int UDP_PORT = 4321;
 
     //Testo del comando di help
