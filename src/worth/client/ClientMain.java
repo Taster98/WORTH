@@ -59,6 +59,12 @@ public class ClientMain {
         return in.readLine();
     }
 
+    //Metodo per l'invio al server dei dati del logout in caso di interruzione del programma
+    private String logoutAndExit() throws IOException{
+        out.println("logexit");
+        return in.readLine();
+    }
+
     //Metodo per la richiesta di lettura del file della lista di utenti (tutti o solo online)
     //Questo metodo non invia nulla al server poichè è locale al client.
     private String listUsers(String str) throws IOException {
@@ -495,6 +501,10 @@ public class ClientMain {
                 }
                 break;
             case "exit":
+                if(logged){
+                    String nickname = logoutAndExit();
+                    server.unregister(stubCB, nickname); //mi deregistro dalla callback
+                }
                 if (exec.length == 1) {
                     this.stopConnection();
                     System.exit(0);

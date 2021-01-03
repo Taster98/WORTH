@@ -253,6 +253,15 @@ public class ClientHandler implements Runnable{
                         out.println(Constants.ANSI_RED + "Wrong usage: try with logout [nickname]"+ Constants.ANSI_RESET);
                     }
                     break;
+                case "logexit": //prima di chiudere il client devo fare logout
+                    if(logged){
+                        userDb.readDb();
+                        userDb.setStatus(utente,"offline");
+                        logged = false;
+                        userDb.writeDb();
+                        out.println(utente.getNickName());
+                    }
+                    break;
                 case "createProject":
                     if(data.length == 2){
                         if(logged){
