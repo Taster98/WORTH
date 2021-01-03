@@ -442,7 +442,7 @@ public class ClientHandler implements Runnable{
                                             readProjects();
                                             readIp();
                                             out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " added successfully!" + Constants.ANSI_RESET);
-                                            UDPServer.sendMessage(utente.getNickName()+" added a new card "+cmds[1]+" to "+cmds[0],ipAddresses.get(auxProj.indexOf(cmds[0])),Constants.UDP_PORT);
+                                            UDPServer.sendMessage(utente.getNickName()+" added a new card "+cmds[1]+" to "+cmds[0],ipAddresses.get(auxProj.lastIndexOf(cmds[0])),Constants.UDP_PORT);
                                         }else{
                                             // ESISTE GIÀ
                                             out.println(Constants.ANSI_RED + "The card already exist! Choose another name." + Constants.ANSI_RESET);
@@ -481,7 +481,7 @@ public class ClientHandler implements Runnable{
                                         readProjects();
                                         readIp();
                                         out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " moved successfully!" + Constants.ANSI_RESET);
-                                        UDPServer.sendMessage(utente.getNickName()+" moved card "+cmds[1]+" from "+cmds[2]+" to "+cmds[3]+" in project "+cmds[0],ipAddresses.get(auxProj.indexOf(cmds[0])),Constants.UDP_PORT);
+                                        UDPServer.sendMessage(utente.getNickName()+" moved card "+cmds[1]+" from "+cmds[2]+" to "+cmds[3]+" in project "+cmds[0],ipAddresses.get(auxProj.lastIndexOf(cmds[0])),Constants.UDP_PORT);
                                     }else{
                                         if(res == -1){
                                             out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists! Error "+res + Constants.ANSI_RESET);
@@ -541,7 +541,7 @@ public class ClientHandler implements Runnable{
                             if(userDb.isMember(data[1],utente)){
                                 readProjects();
                                 readIp();
-                                out.println("yes"+ipAddresses.get(projects.indexOf(data[1])));
+                                out.println("yes"+ipAddresses.get(auxProj.lastIndexOf(data[1])));
                             }else{
                                 // NON AMMESSO!
                                 out.println(Constants.ANSI_RED + "You don't have access to this project!" + Constants.ANSI_RESET);
@@ -562,7 +562,7 @@ public class ClientHandler implements Runnable{
                                     //qui sono loggato, appartengo al progetto e posso finalmente inviare il messaggio
                                     readProjects();
                                     readIp();
-                                    UDPServer.sendMessage(Constants.ANSI_YELLOW+utente.getNickName()+" sent: "+cmds[1]+Constants.ANSI_RESET,ipAddresses.get(auxProj.indexOf(cmds[0])),Constants.UDP_PORT);
+                                    UDPServer.sendMessage(Constants.ANSI_YELLOW+utente.getNickName()+" sent: "+cmds[1]+Constants.ANSI_RESET,ipAddresses.get(auxProj.lastIndexOf(cmds[0])),Constants.UDP_PORT);
                                     out.println("");
                                 }else{
                                     // NON AMMESSO!
@@ -596,10 +596,7 @@ public class ClientHandler implements Runnable{
                                         //rimuovo da ogni utente il riferimento al progetto
                                         userDb.removeProject(utente,data[1]);
                                         userDb.writeDb();
-                                        //Prendo l'indice del progetto nella lista qui dentro
-                                        //int toRemove = projects.indexOf(data[1]);
-                                        //removeIp(toRemove);
-                                        //rimuovo dalla lista nel file
+                                        //Rimuovo il progetto
                                         removeProject(data[1]);
                                         writeProjects();
                                         //writeIp();

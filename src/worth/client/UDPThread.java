@@ -10,9 +10,7 @@ import java.net.MulticastSocket;
 //Questo thread gestisce la ricezione di messaggi/aggiornamenti di uno specifico progetto.
 /*
 * INDIRIZZO IP:
-* Il progetto è stato testato in locale. Gli indirizzi ip per il multicast sono stati scelti tra quelli
-* "Administratively scoped (local) multicast addresses" (da 239.0.0.0 a 239.255.255.255),
-* in particolare da 239.0.0.0 a 239.0.0.255 (quindi con un massimo range di 255 ip, ossia 255 progetti).
+* GLi indirizzi ip sono scelti in maniera sequenziale nel range 224.0.0.0-239.255.255.255.
 * */
 public class UDPThread implements Runnable{
     String ip;

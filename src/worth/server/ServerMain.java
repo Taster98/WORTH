@@ -1,16 +1,24 @@
 package worth.server;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import worth.Constants;
 import worth.RegistrationInterface;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.lang.reflect.Type;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /*Questa è la classe che rappresenta il server principale, che si occupa di registrare la RMI per la registrazione di un utente
 e l'avvio di un'istanza di server TCP.
@@ -48,8 +56,53 @@ public class ServerMain implements RegistrationInterface {
         if(andata) return 7;
         else return 0;
     }
+    public static void restore(){
+        File f1 = new File(Constants.fileProgettiPath);
+        File f2 = new File(Constants.auxProjectList);
+        ArrayList<String> ips, auxs;
+        try {
+            //Copio il contenuto di f1 in f2
+            Files.copy(f1.toPath(),f2.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            //Leggo i contenuti di f2 ed f3
+            Gson gson = new Gson();
+            BufferedReader br;
+            br = new BufferedReader(new FileReader(Constants.auxProjectList));
+            Type type = new TypeToken<ArrayList<String>>() {
+            }.getType();
+            auxs = gson.fromJson(br, type);
+            br = new BufferedReader(new FileReader(Constants.ipAddressPath));
+            ips = gson.fromJson(br, type);
+            List<String> newips = null;
+            if(ips != null) {
+                newips = ips.subList(0, auxs.size());
+            }
+            //Ora posso riscrivere la lista di ip:
+            Writer writer = new FileWriter(Constants.ipAddressPath);
+            gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(newips, writer);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public static void cleanUp(){
+        //Svuoto le liste
+        File f1 = new File(Constants.auxProjectList);
+        PrintWriter writer;
+        try {
+            writer = new PrintWriter(f1);
+            writer.print("");
+            writer.flush();
+            writer.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
     public static void main(String[] args) {
+        //Restore dello stato del server
+        restore();
         try {
             ServerMain srv = new ServerMain();
             // Creo lo stub per la registrazione:
@@ -78,6 +131,8 @@ public class ServerMain implements RegistrationInterface {
                 public void run() {
                     try {
                         Thread.sleep(200);
+                        //Pulisco i file
+                        cleanUp();
                         //chiudo la connessione
                         server.shutdown = true;
                         try {
