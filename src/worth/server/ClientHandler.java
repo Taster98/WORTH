@@ -154,7 +154,10 @@ public class ClientHandler implements Runnable{
         projects.remove(prj);
     }
 
-    //Metodo ausiliario che gestisce le azioni da fare a seconda del comando ricevuto
+    /*Metodo ausiliario che gestisce le azioni da fare a seconda del comando ricevuto
+    @REQUIRE: Un utente viene automaticamente settato come offline all'uscita del programma.
+    Pertanto, al riavvio deve fare nuovamente il login
+    */
     private void actionHandler(String action){
         // Qui posso avere diverse azioni da voler fare;
         if(action == null) {
