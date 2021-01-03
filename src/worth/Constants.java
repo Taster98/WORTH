@@ -17,6 +17,8 @@ public final class Constants {
     public static final String fileProgettiPath = progettiPath+"listaProgetti.json";
     //Percorso del file degli indirizzi ip
     public static final String ipAddressPath = progettiPath+"listaIpAddress.json";
+    //Percorso del file con una lista progetti ausiliaria immutabile
+    public static final String auxProjectList = progettiPath+"auxProjectList.json";
     //Percorso lista utenti da aggiornare client
     public static final String userListPath = "worth/client/userList.txt";
 
@@ -25,7 +27,7 @@ public final class Constants {
     //Indirizzo del server TCP (in questo caso è l'indirizzo locale)
     public static final String LOCALHOST_IP = "127.0.0.1";
     //Base per l'indirizzo multicast LOCALE
-    public static final String CHAT_IP_BASE = "239.0.0.0";
+    public static final String CHAT_IP_BASE = "224.0.0.0";
     public static final int UDP_PORT = 4321;
 
     //Testo del comando di help

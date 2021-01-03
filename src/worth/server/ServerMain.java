@@ -72,15 +72,12 @@ public class ServerMain implements RegistrationInterface {
 
             // Avvio server TCP, passandogli il callback server
             TCPServer server = new TCPServer(serverCB);
+
+            //Catturo il sigint CTRL+C
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     try {
                         Thread.sleep(200);
-                        //Pulisco file degli ip
-                        PrintWriter pw = new PrintWriter(Constants.ipAddressPath);
-                        pw.print("");
-                        pw.flush();
-                        pw.close();
                         //chiudo la connessione
                         server.shutdown = true;
                         try {
@@ -91,12 +88,13 @@ public class ServerMain implements RegistrationInterface {
                         //Ultima print
                         System.out.println("\nServer stopped.");
 
-                    } catch (InterruptedException | FileNotFoundException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         e.printStackTrace();
                     }
                 }
             });
+            //Avvio il server
             server.start();
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());

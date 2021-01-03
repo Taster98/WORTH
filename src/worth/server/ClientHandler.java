@@ -19,6 +19,8 @@ public class ClientHandler implements Runnable{
     private DatabaseUsers userDb;
     // riferimento alla lista progetti
     private CopyOnWriteArrayList<String> projects;
+    //riferimento alla lista progetti immutabile
+    private CopyOnWriteArrayList<String> auxProj;
     // riferimento alla lista di ip
     private CopyOnWriteArrayList<String> ipAddresses;
     // variabile di controllo per far sì che un client si connetta solo con un user alla volta
@@ -46,6 +48,9 @@ public class ClientHandler implements Runnable{
             Type type = new TypeToken<CopyOnWriteArrayList<String>>() {
             }.getType();
             projects = gson.fromJson(br, type);
+            //leggo anche la lista immutabile
+            br = new BufferedReader(new FileReader(Constants.auxProjectList));
+            auxProj = gson.fromJson(br,type);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -57,6 +62,11 @@ public class ClientHandler implements Runnable{
             writer = new FileWriter(Constants.fileProgettiPath);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             gson.toJson(projects, writer);
+            writer.flush();
+            writer.close();
+            //Scrivo anche nella lista immutabile
+            writer = new FileWriter(Constants.auxProjectList);
+            gson.toJson(auxProj, writer);
             writer.flush();
             writer.close();
         } catch (IOException e) {
@@ -91,9 +101,40 @@ public class ClientHandler implements Runnable{
         }
     }
     //funzione che aggiunge l'ip relativo in lista
-    public synchronized void addIp(String ip) {
+    //Suppongo di utilizzare gli indirizzi dal 224.0.0.0 al 239.255.255.255
+    public synchronized void addIp(int offset) {
         if(ipAddresses == null)
             ipAddresses = new CopyOnWriteArrayList<>();
+        //A seconda di offset, faccio questo:
+        String ip = Constants.CHAT_IP_BASE;
+        if(offset<256){
+            ip = Constants.CHAT_IP_BASE.substring(0,8)+offset;
+        }else if(offset<65536){
+            //224.0.0.0
+            int third = (int)offset/256;
+            int fourth = offset-third*256;
+            ip = Constants.CHAT_IP_BASE.substring(0,6)+third+"."+fourth;
+        }else if(offset<16777216){
+            //15000000  224.228.225.192
+            //70000 224.1.17.112
+            //100000 224.1.134.160
+            //16777215 224.255.255.255
+            int second = (int)offset/65536;
+            int third = offset - second*65536;
+            third = third/256;
+            int fourth = offset -second*65536-third*256;
+            ip = Constants.CHAT_IP_BASE.substring(0,4)+second+"."+third+"."+fourth;
+        }else if(offset<268435456){
+            //268435455 239.255.255.255
+            int first = (int)offset/16777216;
+            int realfirst = first+224;
+            int second = offset - first*16777216;
+            second = second/65536;
+            int third = offset - first*16777216 - second*65536;
+            third = third/256;
+            int fourth = offset - first*16777216 - second*65536 - third*256;
+            ip = realfirst + "."+second+"."+third+"."+fourth;
+        }
         ipAddresses.addIfAbsent(ip);
     }
 
@@ -101,6 +142,9 @@ public class ClientHandler implements Runnable{
     public synchronized boolean addProject(String prj) {
         if(projects == null)
             projects = new CopyOnWriteArrayList<>();
+        if(auxProj == null)
+            auxProj = new CopyOnWriteArrayList<>();
+        auxProj.add(prj);
         return projects.addIfAbsent(prj);
     }
     //funzione che rimuove un progetto
@@ -229,9 +273,9 @@ public class ClientHandler implements Runnable{
                                         //Qui dentro ho finito, quindi salvo la lista corrente di tutti i progetti e in più stampo risultato positivo.
                                         writeProjects();
                                         //Aggiungo prima l'ip nella lista
-                                        int offset = projects.size();
+                                        int offset = auxProj.size();
                                         readIp();
-                                        addIp(Constants.CHAT_IP_BASE.substring(0,7)+"."+offset); //QUESTO VALE SOLO PER 255 IP DIVERSI OVVIAMENTE
+                                        addIp(offset); //QUESTO VALE SOLO PER 255 IP DIVERSI OVVIAMENTE
                                         writeIp();
                                         //Scrivo anche l'utente creatore nella lista utenti
                                         if(p.writeUserList(dir)){
@@ -300,15 +344,21 @@ public class ClientHandler implements Runnable{
                                 if (userDb.isMember(cmds[0], utente)) {
                                     User usr = new User();
                                     usr.setNickName(cmds[1]);
-                                    if (userDb.addMemberToList(cmds[0], usr)) {
-                                        // MEMBER ADDED
-                                        out.println(Constants.ANSI_GREEN + usr.getNickName() + " added successfully!" + Constants.ANSI_RESET);
-                                        readProjects();
-                                        readIp();
-                                        UDPServer.sendMessage(utente.getNickName()+" added "+usr.getNickName()+" to "+cmds[0],ipAddresses.get(projects.indexOf(cmds[0])),Constants.UDP_PORT);
-                                    } else {
-                                        // ALREADY IN
-                                        out.println(Constants.ANSI_RED + "The user is already inside this project!" + Constants.ANSI_RESET);
+                                    //DEVO CONTROLLARE CHE L'UTENTE ESISTA
+                                    if(userDb.cercaUtente(usr)) {
+                                        if (userDb.addMemberToList(cmds[0], usr)) {
+                                            // MEMBER ADDED
+                                            out.println(Constants.ANSI_GREEN + usr.getNickName() + " added successfully!" + Constants.ANSI_RESET);
+                                            readProjects();
+                                            readIp();
+                                            UDPServer.sendMessage(utente.getNickName() + " added " + usr.getNickName() + " to " + cmds[0], ipAddresses.get(auxProj.indexOf(cmds[0])), Constants.UDP_PORT);
+                                        } else {
+                                            // ALREADY IN
+                                            out.println(Constants.ANSI_RED + "The user is already inside this project!" + Constants.ANSI_RESET);
+                                        }
+                                    }else{
+                                        //NON ESISTE
+                                        out.println(Constants.ANSI_RED + "The user does not exist" + Constants.ANSI_RESET);
                                     }
                                 } else {
                                     // NON AMMESSO!
@@ -392,7 +442,7 @@ public class ClientHandler implements Runnable{
                                             readProjects();
                                             readIp();
                                             out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " added successfully!" + Constants.ANSI_RESET);
-                                            UDPServer.sendMessage(utente.getNickName()+" added a new card "+cmds[1]+" to "+cmds[0],ipAddresses.get(projects.indexOf(cmds[0])),Constants.UDP_PORT);
+                                            UDPServer.sendMessage(utente.getNickName()+" added a new card "+cmds[1]+" to "+cmds[0],ipAddresses.get(auxProj.indexOf(cmds[0])),Constants.UDP_PORT);
                                         }else{
                                             // ESISTE GIÀ
                                             out.println(Constants.ANSI_RED + "The card already exist! Choose another name." + Constants.ANSI_RESET);
@@ -431,7 +481,7 @@ public class ClientHandler implements Runnable{
                                         readProjects();
                                         readIp();
                                         out.println(Constants.ANSI_GREEN + "Card " + cmds[1] + " moved successfully!" + Constants.ANSI_RESET);
-                                        UDPServer.sendMessage(utente.getNickName()+" moved card "+cmds[1]+" from "+cmds[2]+" to "+cmds[3]+" in project "+cmds[0],ipAddresses.get(projects.indexOf(cmds[0])),Constants.UDP_PORT);
+                                        UDPServer.sendMessage(utente.getNickName()+" moved card "+cmds[1]+" from "+cmds[2]+" to "+cmds[3]+" in project "+cmds[0],ipAddresses.get(auxProj.indexOf(cmds[0])),Constants.UDP_PORT);
                                     }else{
                                         if(res == -1){
                                             out.println(Constants.ANSI_RED + "Movement not reached! Try again checking carefully lists! Error "+res + Constants.ANSI_RESET);
@@ -512,7 +562,7 @@ public class ClientHandler implements Runnable{
                                     //qui sono loggato, appartengo al progetto e posso finalmente inviare il messaggio
                                     readProjects();
                                     readIp();
-                                    UDPServer.sendMessage(Constants.ANSI_YELLOW+utente.getNickName()+" sent: "+cmds[1]+Constants.ANSI_RESET,ipAddresses.get(projects.indexOf(cmds[0])),Constants.UDP_PORT);
+                                    UDPServer.sendMessage(Constants.ANSI_YELLOW+utente.getNickName()+" sent: "+cmds[1]+Constants.ANSI_RESET,ipAddresses.get(auxProj.indexOf(cmds[0])),Constants.UDP_PORT);
                                     out.println("");
                                 }else{
                                     // NON AMMESSO!
@@ -535,6 +585,7 @@ public class ClientHandler implements Runnable{
                                 Project p = new Project(data[1]);
                                 p.readAllLists(Constants.progettiPath+data[1]);
                                 readProjects();
+                                //readIp();
                                 //Se tutte le card sono done allora sì, sennò no
                                 //Se doneList è null e l'altra no, non posso sicuro cancellare
                                 if((p.getDoneCards() == null && p.getAllCards() != null) || (p.getAllCards() == null && p.getDoneCards() != null)){
@@ -545,9 +596,13 @@ public class ClientHandler implements Runnable{
                                         //rimuovo da ogni utente il riferimento al progetto
                                         userDb.removeProject(utente,data[1]);
                                         userDb.writeDb();
+                                        //Prendo l'indice del progetto nella lista qui dentro
+                                        //int toRemove = projects.indexOf(data[1]);
+                                        //removeIp(toRemove);
                                         //rimuovo dalla lista nel file
                                         removeProject(data[1]);
                                         writeProjects();
+                                        //writeIp();
                                         //rimuovo la directory
                                         p.removeDir(new File(Constants.progettiPath+"/"+data[1]));
                                         out.println(Constants.ANSI_GREEN + "Project removed successfully!" +Constants.ANSI_RESET);

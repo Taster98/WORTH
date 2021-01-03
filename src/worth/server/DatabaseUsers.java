@@ -88,6 +88,7 @@ public class DatabaseUsers {
 
     //metodo che aggiunge un progetto a un utente
     public synchronized boolean addProject(User usr, String projectName){
+        if(!userDb.contains(usr)) return false;
         User aux = userDb.get(userDb.indexOf(usr));
         if(aux.getProjectList() == null){
            aux.setProjectList(new CopyOnWriteArrayList<>());
