@@ -323,6 +323,9 @@ public class Project {
         if(listSrc != null && listDest != null){
             //Controllo che le liste siano diverse; se fossero uguali non sposto nulla
             if(listSrc != listDest){
+                //Controllo i vari possibili casi di spostamento: todolist->progress, progress->done || revised, revised->progress || done
+                boolean admitted = ((srcList.equals("todo") && destList.equals("progress")) || (srcList.equals("progress") && (destList.equals("done") || destList.equals("revised"))) || (srcList.equals("revised") && (destList.equals("progress") || destList.equals("done"))));
+                if(!admitted) return -6; //Se la condizione è falsa esco senza spostare, altrimenti continua dopo
                 //controllo che la lista src contiene la card da spostare
                 Card c = new Card(cardName);
                 if(listSrc.contains(c)){
@@ -340,7 +343,6 @@ public class Project {
             return -1;
         }
     }
-
     //Metodo che ritorna la history di una card, sottoforma di stringa
     public String getCardHistory(String cardName){
         Card c = new Card(cardName);

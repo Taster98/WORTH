@@ -26,7 +26,7 @@ public class ServerNotificaImpl extends RemoteObject implements NotificaServer {
         if(!userList.contains(nick)){
             userList.add(nick);
             clientList.add(client);
-            System.out.println("Client registered");
+            //System.out.println("Client registered"); DEBUG PRINT
         }
     }
 
@@ -36,7 +36,7 @@ public class ServerNotificaImpl extends RemoteObject implements NotificaServer {
             int i = userList.indexOf(nick);
             userList.remove(nick);
             clientList.remove(i);
-            System.out.println("Client unregistered successfully");
+            //System.out.println("Client unregistered successfully"); DEBUG PRINT
         }else{
             System.out.println("Unable to unregister client");
         }
